@@ -201,7 +201,7 @@ const AddArticle = () => {
                 </Form.Group>
               </Row>
 
-              <Form.Group className="mb-5" controlId="formGridContent">
+              <Form.Group className="mb-2" controlId="formGridContent">
                 <Form.Label>Details</Form.Label>
                 <ReactQuill
                   value={content}

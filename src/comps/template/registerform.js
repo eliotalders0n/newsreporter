@@ -153,7 +153,7 @@ export default function RegisterForm() {
               employeeNumber: data.get("employeeNumber"),
               gender: data.get("gender"),
               address: data.get("address"),
-              password: data.get("password"),
+              // password: data.get("password"),
               status: "Pending",
               admin: false,
             })
@@ -180,11 +180,6 @@ export default function RegisterForm() {
       alert("Only users with government emails are allowed to register.");
     }
 
-    console.log({
-      Name: data.get("firstName"),
-      email: data.get("email"),
-      password: data.get("password"),
-    });
   };
 
   const removeProfilePicture = () => {
@@ -273,20 +268,6 @@ export default function RegisterForm() {
                   style={{ display: "none" }}
                 />
 
-                {/* <Button
-                  size="sm"
-                  fullWidth
-                  variant="contained"
-                  onClick={updateProfilePicture}
-                  style={{
-                    fontSize: "10px",
-                    position: "absolute",
-                    bottom: "35px",
-                    backgroundColor: "rgba(0,0,0,0.8)",
-                  }}
-                >
-                  Update Picture
-                </Button> */}
                 <Button
                   size="sm"
                   fullWidth

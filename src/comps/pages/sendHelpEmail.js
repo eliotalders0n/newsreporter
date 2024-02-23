@@ -39,7 +39,7 @@ const EmailButton = () => {
     <div>
       <p>Please kindly reach out to the administrator to request any changes or updates to your details.</p>
       {/* <textarea placeholder="Enter your message" value={message} onChange={handleMessageChange} /> */}
-      <Form.Group className="mb-3" controlId="formGridAddress1">
+      <Form.Group className="mb-3" controlId="formGridMessage">
         <Form.Label>Message</Form.Label>
         <Form.Control placeholder="Enter your message" value={message} onChange={handleMessageChange}  />
       </Form.Group>

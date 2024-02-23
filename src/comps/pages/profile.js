@@ -1,13 +1,27 @@
 import React, { useEffect, useState } from "react";
-import { Card, Stack, Image, Button, Container, Form, Col, Row } from "react-bootstrap";
+import {
+  Stack,
+  Image,
+  Container,
+  Form,
+  Col,
+  Row,
+} from "react-bootstrap";
 import firebase from "./../../firebase";
 import { useNavigate } from "react-router-dom";
 import EmailButton from "./sendHelpEmail";
+import useGetMinistries from "../hooks/useGetMinistries";
 import { useTheme } from "../template/themeContext";
+import { FormControl, LinearProgress, Button } from "@mui/material";
+import { Alarm } from "@mui/icons-material";
 
-const Profile = ({ title, date, postedBy, imageUrl }) => {
-
+const Profile = () => {
   const navigate = useNavigate();
+  const [userpic, setUserPic] = useState(null);
+  // const [images, setImages] = useState([]);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploading, setUploading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const Logout = () => {
     firebase
@@ -19,23 +33,136 @@ const Profile = ({ title, date, postedBy, imageUrl }) => {
       });
   };
 
-  const [user_, setdocs] = useState([]);
+  const [user_, setUser] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    employeeNumber: "",
+    ministry: "",
+    address: "",
+    contact: "",
+    // password: "",
+  });
+
   useEffect(() => {
     firebase
       .firestore()
       .collection("Users")
       .doc(firebase.auth().currentUser.uid)
       .onSnapshot((doc) => {
-        setdocs(doc.data());
+        setUser(doc.data());
       });
   }, []);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setUser((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      setSubmitting(true);
+      // Update user data in Firestore
+      await firebase
+        .firestore()
+        .collection("Users")
+        .doc(firebase.auth().currentUser.uid)
+        .update(user_)
+        .then(() => {
+          setSubmitting(false);
+          console.log("User data updated successfully!");
+          alert("Profile updated successfully!")
+        })
+    } catch (error) {
+      console.error("Error updating user data:", error);
+      alert("Error updating profile data")
+      // Handle error gracefully, show an error message to the user, etc.
+    }
+  };
+
+  const handleProfilePictureChange = (event) => {
+    const file = event.target.files[0];
+    const storageRef = firebase.storage().ref();
+    const fileRef = storageRef.child(`profile_pictures/${file.name}`);
+
+    const uploadTask = fileRef.put(file);
+
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        // Calculate upload progress
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        setUploadProgress(progress);
+      },
+      (error) => {
+        console.error("Error uploading profile picture:", error);
+        // Handle error
+      },
+      () => {
+        // Upload completed successfully, get download URL
+        uploadTask.snapshot.ref.getDownloadURL().then((url) => {
+          setUserPic(url); // Set the URL of the uploaded image
+          setUploading(false);
+        });
+      }
+    );
+    setUploading(true);
+  };
+
+
+  const updateProfilePicture = () => {
+    const currentUser = firebase.auth().currentUser;
+    const userId = currentUser.uid;
+
+    firebase
+      .firestore()
+      .collection("Users")
+      .doc(userId)
+      .update({
+        photoURL: userpic, // Save the URL of the uploaded image in the "photoURL" field of the user document
+      })
+      .then(() => {
+        console.log("Profile picture updated successfully");
+        // Optionally, you can reload the page or update the user's profile picture state
+      })
+      .catch((error) => {
+        console.error("Error updating profile picture:", error);
+        // Handle error
+      });
+  };
+
+  const removeProfilePicture = () => {
+    const currentUser = firebase.auth().currentUser;
+    const userId = currentUser.uid;
+
+    firebase
+      .firestore()
+      .collection("Users")
+      .doc(userId)
+      .update({
+        photoURL: firebase.firestore.FieldValue.delete(), // Remove the "photoURL" field from the user document
+      })
+      .then(() => {
+        console.log("Profile picture removed successfully");
+        setUserPic(""); // Clear the URL of the profile picture from the state
+      })
+      .catch((error) => {
+        console.error("Error removing profile picture:", error);
+        // Handle error
+      });
+  };
+  const Ministries = useGetMinistries().docs;
 
   const { theme, toggleTheme } = useTheme();
   return (
     <Container
       style={{
-        backgroundColor: "black",
-        color: "white",
+        backgroundColor: theme === "light" ? "white" : "black",
+        color: theme === "light" ? "black" : "white",
         minHeight: "100vh",
         padding: "12vh 2vh 12vh 2vh",
       }}
@@ -43,20 +170,22 @@ const Profile = ({ title, date, postedBy, imageUrl }) => {
       <Stack direction="horizontal" gap={5}>
         <h2>Profile</h2>
         <Button
-        variant="contained"
-        onClick={toggleTheme}
-        className="p-2 ms-auto"
-        size="small"
-        style={{ backgroundColor: theme === "light" ? "black" : "white",
-        color: theme === "light" ? "white" : "black", }}
-      >
-        {theme === "light" ? "Dark Mode" : "Light Mode"}
-      </Button>
+          variant="contained"
+          onClick={toggleTheme}
+          className="p-2 ms-auto"
+          size="small"
+          style={{
+            backgroundColor: theme === "light" ? "black" : "white",
+            color: theme === "light" ? "white" : "black",
+          }}
+        >
+          {theme === "light" ? "Dark Mode" : "Light Mode"}
+        </Button>
         <Button onClick={() => Logout()} className="p-2 ms-auto" variant="dark">
           Logout
         </Button>
       </Stack>
-<br/>
+      <br />
       <Stack
         style={{
           position: "relative",
@@ -76,65 +205,176 @@ const Profile = ({ title, date, postedBy, imageUrl }) => {
             borderRadius: "50%",
           }}
         />
-        <br/>
+        <label
+          htmlFor="profilePictureInput"
+          style={{
+            position: "absolute",
+            top: "15px",
+            right: "30px",
+            cursor: "pointer",
+            backgroundColor: "rgba(255, 255, 255, 0.1)",
+            borderRadius: "60%",
+            padding: "5px",
+          }}
+        >
+          <i className="bi bi-pencil-fill"></i>
+        </label>
+        <input
+          id="profilePictureInput"
+          type="file"
+          onChange={handleProfilePictureChange}
+          accept="image/*"
+          style={{ display: "none" }}
+        />
+
+        <Button
+          size="sm"
+          fullWidth
+          variant="contained"
+          onClick={updateProfilePicture}
+          style={{
+            fontSize: "10px",
+            position: "absolute",
+            bottom: "35px",
+            backgroundColor: "rgba(0,0,0,0.8)",
+          }}
+        >
+          Update Picture
+        </Button>
+        <Button
+          size="sm"
+          fullWidth
+          variant="contained"
+          onClick={removeProfilePicture}
+          style={{
+            fontSize: "10px",
+            position: "absolute",
+            bottom: "5px",
+            backgroundColor: "rgba(0,0,0,0.8)",
+          }}
+        >
+          Remove Picture
+        </Button>
+        <br />
       </Stack>
-   
-<br/>
-      <Form>
-      <Row className="mb-3">
-        <Form.Group as={Col} controlId="formGridFirstName">
-          <Form.Label>First Name</Form.Label>
-          <Form.Control type="text" placeholder="John" value={user_.firstName} />
-        </Form.Group>
+      {uploading && <LinearProgress variant="determinate" value={uploadProgress} />}
+      <p className="text-center">
+        {user_ && user_.firstName} {user_ && user_.lastName} <br />{" "}
+        {user_ && user_.email}
+      </p>
 
-        <Form.Group as={Col} controlId="formGridLastName">
-          <Form.Label>Last Name</Form.Label>
-          <Form.Control type="Text" placeholder="Doe" value={user_.lastName} />
-        </Form.Group>
-      </Row>
+      <br />
+      <Form
+        onSubmit={handleSubmit}
+        style={{
+          backgroundColor: theme === "light" ? "white" : "black",
+          color: theme === "light" ? "black" : "white",
+        }}
+      >
+        <Row className="mb-3">
+          <Form.Group as={Col} controlId="formGridFirstName">
+            <Form.Label>First Name</Form.Label>
+            <Form.Control
+              onChange={handleInputChange}
+              name="firstName"
+              type="text"
+              placeholder="John"
+              value={user_.firstName}
+            />
+          </Form.Group>
 
-      <Row className="mb-3">
-        <Form.Group as={Col} controlId="formGridEmail">
-          <Form.Label>Email</Form.Label>
-          <Form.Control type="email" placeholder="Enter employee number" value={user_.email} />
-        </Form.Group>
-      </Row>
+          <Form.Group as={Col} controlId="formGridLastName">
+            <Form.Label>Last Name</Form.Label>
+            <Form.Control
+              onChange={handleInputChange}
+              name="lastName"
+              type="Text"
+              placeholder="Doe"
+              value={user_.lastName}
+            />
+          </Form.Group>
+        </Row>
 
-      <Row className="mb-3">
-        <Form.Group as={Col} controlId="formGridEmployeeNumber">
-          <Form.Label>Employee Number</Form.Label>
-          <Form.Control type="number" placeholder="Enter employee number" value={user_.employeeNumber} />
-        </Form.Group>
-      </Row>
+        <Row className="mb-3">
+          <Form.Group as={Col} controlId="formGridEmail">
+            <Form.Label>Email</Form.Label>
+            <Form.Control
+              onChange={handleInputChange}
+              name="email"
+              type="email"
+              placeholder="Enter employee number"
+              value={user_.email}
+            />
+          </Form.Group>
+        </Row>
 
-      <Row className="mb-3">
+        <Row className="mb-3">
+          <Form.Group as={Col} controlId="formGridEmployeeNumber">
+            <Form.Label>Employee Number</Form.Label>
+            <Form.Control
+              onChange={handleInputChange}
+              name="employeeNumber"
+              type="number"
+              placeholder="Enter employee number"
+              value={user_.employeeNumber}
+            />
+          </Form.Group>
+        </Row>
+
+        <Row className="mb-3">
         <Form.Group as={Col} controlId="formGridMinistry">
-          <Form.Label>Ministry</Form.Label>
-          <Form.Control type="text" placeholder="Enter Ministry" value={user_.ministry} />
+        <Form.Label>Ministry</Form.Label>
+          <Form.Select
+            required
+            label="Select Ministry"
+            onChange={handleInputChange}
+            value={user_.ministry}
+          >
+            <option value="">
+              <em>None</em>
+            </option>
+            {Ministries.map((ministry) => (
+              <option value={ministry.name}>{ministry.description}</option>
+            ))}
+          </Form.Select>
         </Form.Group>
-      </Row>
+        </Row>
 
-      <Form.Group className="mb-3" controlId="formGridAddress1">
-        <Form.Label>Address</Form.Label>
-        <Form.Control placeholder="1234 Main St" value={user_.address} />
-      </Form.Group>
+        <Form.Group className="mb-3" controlId="formGridAddress1">
+          <Form.Label>Address</Form.Label>
+          <Form.Control
+            onChange={handleInputChange}
+            name="address"
+            placeholder="1234 Main St"
+            value={user_.address}
+          />
+        </Form.Group>
 
-      <Form.Group className="mb-3" controlId="formGridContact">
-        <Form.Label>Phone Number</Form.Label>
-        <Form.Control type="number" placeholder="0976758366" value={user_.contact} />
-      </Form.Group>
+        <Form.Group className="mb-3" controlId="formGridContact">
+          <Form.Label>Phone Number</Form.Label>
+          <Form.Control
+            onChange={handleInputChange}
+            type="number"
+            name="contact"
+            placeholder="0976758366"
+            value={user_.contact}
+          />
+        </Form.Group>
 
-      <Form.Group className="mb-3" controlId="formGridPassword">
-        <Form.Label>Password</Form.Label>
-        <Form.Control type="password" placeholder="1234MainSt" value={user_.password} />
-      </Form.Group>
-      
-    </Form>
-    {/* <p>Please kindly reach out to the administrator to request any changes or updates to your details.</p>
-    <Button>
-      Send Email
-    </Button> */}
-    <EmailButton/> 
+        {/* <Form.Group className="mb-3" controlId="formGridPassword">
+          <Form.Label>Password</Form.Label>
+          <Form.Control
+            onChange={handleInputChange}
+            type="password"
+            name="password"
+            placeholder="1234MainSt"
+            value={user_.password}
+          />
+        </Form.Group> */}
+        <Button variant="contained" disabled={submitting} fullWidth type="submit">{submitting ? "Submitting..." : "Submit"}</Button>
+      </Form>
+
+      <EmailButton />
     </Container>
   );
 };

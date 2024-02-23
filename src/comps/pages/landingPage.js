@@ -16,10 +16,12 @@ import { useState, useEffect } from "react";
 import firebase from "./../../firebase";
 import AddArticle from "./addArticle";
 import { Skeleton } from "@mui/material";
-import DOMPurify from 'dompurify';
+import DOMPurify from "dompurify";
+import { useTheme } from "../template/themeContext";
 
 function Landing(props) {
   const navigate = useNavigate();
+  const { theme } = useTheme();
   const [loading, setLoading] = useState(true); // State to track loading status
 
   const [articles, setArticles] = useState([]);
@@ -31,6 +33,7 @@ function Landing(props) {
       .firestore()
       .collection("Articles")
       .where("status", "==", "approved")
+      .where("video", "==", false)
       .orderBy("createdAt", "desc")
       .onSnapshot((snapshot) => {
         const articles = snapshot.docs.map((doc) => ({
@@ -67,7 +70,7 @@ function Landing(props) {
 
   const sanitizeHTML = (html) => {
     return {
-      __html: DOMPurify.sanitize(html)
+      __html: DOMPurify.sanitize(html),
     };
   };
 
@@ -75,9 +78,9 @@ function Landing(props) {
     <Container
       fluid
       style={{
-        backgroundColor: "black",
+        backgroundColor: theme === "light" ? "white" : "black",
+        color: theme === "light" ? "black" : "white",
         minHeight: "100vh",
-        color: "white",
         padding: "12vh 3vh 12vh 3vh",
       }}
     >
@@ -159,7 +162,8 @@ function Landing(props) {
                 to={"/story/" + article.id}
                 state={{ data: article }}
                 style={{
-                  color: "inherit",
+                  backgroundColor: theme === "light" ? "white" : "black",
+                  color: theme === "light" ? "black" : "white",
                   textDecoration: "none",
                 }}
               >
@@ -169,14 +173,16 @@ function Landing(props) {
                     height: "100%",
                     minWidth: "38vh",
                     border: "none",
-                    backgroundColor: "black",
+                    backgroundColor: theme === "light" ? "white" : "black",
+        color: theme === "light" ? "black" : "white",
                   }}
                   onClick={() => navigate("/story")}
                 >
                   <Card.Body
                     style={{
                       backgroundImage: `url("${article.imagesUrls[0]}")`,
-                      color: "white",
+                      backgroundColor: theme === "light" ? "white" : "black",
+                      color: theme === "light" ? "black" : "white",
                       backgroundSize: "cover",
                       borderRadius: "18px",
                     }}
@@ -184,7 +190,11 @@ function Landing(props) {
                     {console.log(article.imagesUrls[0])}
                     <Card.Title
                       style={{
-                        backgroundColor: "rgba(40,40,40,0.3)",
+                        backgroundColor:
+                            theme === "light"
+                              ? "rgba(250,250,250,0.8)"
+                              : "rgba(50,50,50,0.5)",
+                          color: theme === "light" ? "black" : "white",
                         borderRadius: "10px",
                         padding: "1px",
                       }}
@@ -199,23 +209,29 @@ function Landing(props) {
                   </Card.Body>
                   <Card.Text
                     style={{
-                      backgroundColor: "black",
-                      color: "white",
+                      backgroundColor: theme === "light" ? "white" : "black",
+                      color: theme === "light" ? "black" : "white",
                       fontSize: "14px",
                       margin: "5px 5px",
                     }}
                   >
-                    {article.content.length > 100
-                      ? (
-                        <div dangerouslySetInnerHTML={sanitizeHTML(`${article.content.substring(0, 100)}...`)} />
-                      ) : (
-                        <div dangerouslySetInnerHTML={sanitizeHTML(article.content)} />
-                      )}
+                    {article.content.length > 100 ? (
+                      <div
+                        dangerouslySetInnerHTML={sanitizeHTML(
+                          `${article.content.substring(0, 100)}...`
+                        )}
+                      />
+                    ) : (
+                      <div
+                        dangerouslySetInnerHTML={sanitizeHTML(article.content)}
+                      />
+                    )}
                   </Card.Text>
                   <Stack
                     direction="horizontal"
                     gap={2}
-                    style={{ color: "white" }}
+                    style={{ backgroundColor: theme === "light" ? "white" : "black",
+                    color: theme === "light" ? "black" : "white", }}
                   >
                     <Image
                       src="assets/ministries/labour.png"
@@ -228,8 +244,8 @@ function Landing(props) {
                   </Stack>
                   <Card.Text
                     style={{
-                      backgroundColor: "black",
-                      color: "white",
+                      backgroundColor: theme === "light" ? "white" : "black",
+        color: theme === "light" ? "black" : "white",
                       fontSize: "10px",
                       margin: "2px 5px",
                     }}
@@ -244,12 +260,14 @@ function Landing(props) {
         )}
       </Row>
       <Modal show={showShare} onHide={handleShareClose}>
-        <Modal.Body style={{ backgroundColor: "black", color: "white" }}>
+        <Modal.Body style={{ backgroundColor: theme === "light" ? "white" : "black",
+        color: theme === "light" ? "black" : "white", }}>
           <h2 className="text-center display-3">Submit Report</h2>
           <br />
           <AddArticle />
         </Modal.Body>
-        <Modal.Footer style={{ backgroundColor: "black", color: "white" }}>
+        <Modal.Footer style={{ backgroundColor: theme === "light" ? "white" : "black",
+        color: theme === "light" ? "black" : "white", }}>
           <Button variant="dark" onClick={handleShareClose}>
             X
           </Button>

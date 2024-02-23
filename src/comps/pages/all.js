@@ -5,10 +5,12 @@ import { useState, useEffect } from "react";
 import firebase from "./../../firebase";
 import { useLocation } from "react-router-dom";
 import { Skeleton, Stack } from "@mui/material";
+import { useTheme } from "../template/themeContext";
 
 const All = () => {
   const [articles, setArticles] = useState([]);
 const [authors, setAuthors] = useState({});
+const { theme } = useTheme();
 const [loading, setLoading] = useState(true); // State to track loading status
 const user_ = firebase.auth().currentUser;
 console.log("ugly ut: " + user_);
@@ -55,10 +57,10 @@ useEffect(() => {
   return (
     <div
       style={{
-        backgroundColor: "black",
+        backgroundColor: theme === "light" ? "white" : "black",
+        color: theme === "light" ? "black" : "white",
         minHeight: "100vh",
         padding: "12vh 1vh 12vh 1vh",
-        color: "white"
       }}
     >
     <ReportsHeader/>    

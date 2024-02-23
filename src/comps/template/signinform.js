@@ -41,7 +41,7 @@ const defaultTheme = createTheme({
 });
 
 export default function LoginForm() {
-  // const [loggedin, setLoggedin] = useState(false);
+  const [loggedin, setLoggedin] = useState(false);
   const [error, setError] = useState("");
 
   const handleSubmit = async (event) => {
@@ -70,7 +70,7 @@ export default function LoginForm() {
       // Check if the user is a reporter
       if (userRole === "reporter" && userStatus === "Approved") {
         console.log("Successfully logged in!");
-        // setLoggedin(true);
+        setLoggedin(true);
       } else {
         // User is not a reporter, so sign them out and display an error
         await firebase.auth().signOut();
@@ -83,9 +83,9 @@ export default function LoginForm() {
     }
   };
 
-  // if (loggedin) {
-  //   return <Navigate to="/home" />; // navigate to dashboard
-  // }
+  if (loggedin) {
+    return <Navigate to="/home" />; // navigate to dashboard
+  }
 
   return (
     <>
