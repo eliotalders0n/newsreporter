@@ -22,6 +22,7 @@ useEffect(() => {
     unsubscribeArticles = firebase
       .firestore()
       .collection("Articles")
+      .where("author","==", firebase.auth().currentUser.uid)
       .where("author", "==", user_.uid)
       .orderBy("createdAt", "desc")
       .onSnapshot((snapshot) => {
@@ -34,23 +35,6 @@ useEffect(() => {
       });
   }
 
-  // Load authors from Firestore
-  const unsubscribeAuthors = firebase
-    .firestore()
-    .collection("Users")
-    .onSnapshot((snapshot) => {
-      const authorsData = {};
-      snapshot.docs.forEach((doc) => {
-        authorsData[doc.id] = doc.data();
-      });
-      setAuthors(authorsData);
-      setLoading(false);
-    });
-
-  return () => {
-    unsubscribeArticles && unsubscribeArticles();
-    unsubscribeAuthors();
-  };
 }, []);
 
 

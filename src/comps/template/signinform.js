@@ -71,6 +71,7 @@ export default function LoginForm() {
       if (userRole === "reporter" && userStatus === "Approved") {
         console.log("Successfully logged in!");
         setLoggedin(true);
+        return <Navigate to="/home" />;
       } else {
         // User is not a reporter, so sign them out and display an error
         await firebase.auth().signOut();

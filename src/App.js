@@ -7,6 +7,9 @@ import Typography from "@mui/material/Typography";
 import LoginRoutes from "./loginRoutes";
 import Routers from "./routes";
 import { ThemeProvider } from "./comps/template/themeContext";
+import { ToastContainer, toast } from "react-toastify"; // Import toast function from react-toastify
+import "react-toastify/dist/ReactToastify.css";
+import NotificationSystem from "./comps/template/notificationSystem";
 
 const App = () => {
   const [state, setstate] = useState(false);
@@ -35,8 +38,29 @@ const App = () => {
     };
   }, []);
 
+  useEffect(() => {
+    console.log("useEffect executed");
+    // Check if notification permission is granted
+    if (Notification.permission === 'granted') {
+      // Permission already granted, no need to request
+      toast.success("Notification permission granted!");
+    } else if (Notification.permission !== 'denied') {
+      // Request notification permission
+      Notification.requestPermission().then((permission) => {
+        if (permission === 'granted') {
+          toast.success("Notification permission granted!");
+        }
+      });
+    }
+  }, []);
+
   return (
     <ThemeProvider>
+      <div>
+        {/* Notification System */}
+        <NotificationSystem />
+        <ToastContainer position="top-right" autoClose={false} />
+      </div>
       {error && (
         <Typography
           variant="body2"

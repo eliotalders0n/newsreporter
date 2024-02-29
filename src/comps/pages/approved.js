@@ -17,6 +17,7 @@ const Approved = () => {
     const unsubscribeArticles = firebase
       .firestore()
       .collection("Articles")
+      .where("author","==", firebase.auth().currentUser.uid)
       .where("status", "==", "approved")
       .orderBy("createdAt", "desc")
       .onSnapshot((snapshot) => {
@@ -28,23 +29,7 @@ const Approved = () => {
         setLoading(false); // Set loading to false when articles are fetched
       });
 
-    // Load authors from Firestore
-    const unsubscribeAuthors = firebase
-      .firestore()
-      .collection("Users")
-      .onSnapshot((snapshot) => {
-        const authorsData = {};
-        snapshot.docs.forEach((doc) => {
-          authorsData[doc.id] = doc.data();
-        });
-        setAuthors(authorsData);
-        setLoading(false);
-      });
-
-    return () => {
-      unsubscribeArticles();
-      unsubscribeAuthors();
-    };
+   
   }, []);
 
   return (

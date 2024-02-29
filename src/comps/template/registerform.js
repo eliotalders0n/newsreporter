@@ -135,43 +135,45 @@ export default function RegisterForm() {
         .auth()
         .createUserWithEmailAndPassword(data.get("email"), data.get("password"))
         .then((userCredential) => {
-          console.log(userCredential);
           var user = userCredential.user;
-          firebase
-            .firestore()
-            .collection("Users")
-            .doc(user.uid)
-            .set({
-              firstName: data.get("firstName"),
-              lastName: data.get("lastName"),
-              email: data.get("email"),
-              ministry: data.get("ministry"),
-              role: "reporter",
-              photoURL: userpic,
-              age: data.get("age"),
-              contact: data.get("contact"),
-              employeeNumber: data.get("employeeNumber"),
-              gender: data.get("gender"),
-              address: data.get("address"),
-              // password: data.get("password"),
-              status: "Pending",
-              admin: false,
-            })
+          user
+            .sendEmailVerification()
             .then(() => {
-              setSubmitting(false);
-              firebase.auth().signOut();
-              navigate("/statuspage");
-              console.log("added to database");
+              console.log("Verification email sent");
+              firebase
+                .firestore()
+                .collection("Users")
+                .doc(user.uid)
+                .set({
+                  firstName: data.get("firstName"),
+                  lastName: data.get("lastName"),
+                  email: data.get("email"),
+                  ministry: data.get("ministry"),
+                  role: "reporter",
+                  photoURL: userpic,
+                  age: data.get("age"),
+                  contact: data.get("contact"),
+                  employeeNumber: data.get("employeeNumber"),
+                  gender: data.get("gender"),
+                  address: data.get("address"),
+                  status: "Pending",
+                  admin: false,
+                })
+                .then(() => {
+                  setSubmitting(false);
+                  firebase.auth().signOut();
+                  navigate("/statuspage");
+                  console.log("added to database");
+                })
+                .catch((e) => console.log(e));
             })
-            .catch((e) => console.log(e));
-
-          // Signed ins
+            .catch((error) => {
+              console.error("Error sending verification email:", error);
+            });
         })
         .catch((error) => {
           var errorMessage = error.message;
-          alert(errorMessage);
-
-          // ..
+          alert("Error sending verification email, " + errorMessage + " Please check your email for verification and wait for your account to be approved");
         });
     } else {
       console.error(
@@ -179,7 +181,6 @@ export default function RegisterForm() {
       );
       alert("Only users with government emails are allowed to register.");
     }
-
   };
 
   const removeProfilePicture = () => {

@@ -328,7 +328,6 @@ const Profile = () => {
             required
             label="Select Ministry"
             onChange={handleInputChange}
-            value={user_.ministry}
           >
             <option value="">
               <em>None</em>

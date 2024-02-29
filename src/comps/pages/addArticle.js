@@ -98,8 +98,6 @@ const AddArticle = () => {
                       setUploadProgress(0);
                       setShowModal(true);
                       // setUploading(true);
-
-                      // Redirect to another page or perform any other action
                       navigate("/pending");
                     })
                     .catch((error) => {
@@ -131,30 +129,40 @@ const AddArticle = () => {
 
   const { theme } = useTheme();
 
+
   return (
     <>
-    <Stack direction="horizontal">
-      <Button
-        onClick={() => handleSubmitModal("article")}
-        fullWidth
-        variant="contained"
-        sx={{ mt: 3, mb: 2 }}
-        style={{backgroundColor: theme === "light" ? "black" : "white",
-        color: theme === "light" ? "white" : "black", fontWeight: "900"}}
-      >
-        Add Article
-      </Button>
-      <h3 className="text-center" style={{padding: "20px"}}> or </h3>
-      <Button
-        onClick={() => handleSubmitModal("video")}
-        fullWidth
-        variant="contained"
-        sx={{ mt: 3, mb: 2 }}
-        style={{backgroundColor: theme === "light" ? "black" : "white",
-        color: theme === "light" ? "white" : "black", fontWeight: "900"}}
-      >
-        Add Video
-      </Button>
+      <Stack direction="horizontal">
+        <Button
+          onClick={() => handleSubmitModal("article")}
+          fullWidth
+          variant="contained"
+          sx={{ mt: 3, mb: 2 }}
+          style={{
+            backgroundColor: theme === "light" ? "black" : "white",
+            color: theme === "light" ? "white" : "black",
+            fontWeight: "900",
+          }}
+        >
+          Add Article
+        </Button>
+        <h3 className="text-center" style={{ padding: "20px" }}>
+          {" "}
+          or{" "}
+        </h3>
+        <Button
+          onClick={() => handleSubmitModal("video")}
+          fullWidth
+          variant="contained"
+          sx={{ mt: 3, mb: 2 }}
+          style={{
+            backgroundColor: theme === "light" ? "black" : "white",
+            color: theme === "light" ? "white" : "black",
+            fontWeight: "900",
+          }}
+        >
+          Add Video
+        </Button>
       </Stack>
       <Modal
         show={showModal}
@@ -232,8 +240,15 @@ const AddArticle = () => {
                 />
               </Form.Group>
               <br />
-              <Button variant="success" type="submit" disabled={submitting} style={{backgroundColor: theme === "light" ? "black" : "white",
-        color: theme === "light" ? "white" : "black"}} >
+              <Button
+                variant="success"
+                type="submit"
+                disabled={submitting}
+                style={{
+                  backgroundColor: theme === "light" ? "black" : "white",
+                  color: theme === "light" ? "white" : "black",
+                }}
+              >
                 {submitting ? "Submitting..." : "Submit"}
               </Button>
               {uploading && (
@@ -276,8 +291,15 @@ const AddArticle = () => {
                 />
               </Form.Group>
               <br />
-              <Button variant="success" type="submit" disabled={submitting} style={{backgroundColor: theme === "light" ? "black" : "white",
-        color: theme === "light" ? "white" : "black"}}>
+              <Button
+                variant="success"
+                type="submit"
+                disabled={submitting}
+                style={{
+                  backgroundColor: theme === "light" ? "black" : "white",
+                  color: theme === "light" ? "white" : "black",
+                }}
+              >
                 {submitting ? "Submitting..." : "Submit"}
               </Button>
               {uploading && (
