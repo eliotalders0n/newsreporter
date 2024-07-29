@@ -1,0 +1,71 @@
+[{
+  "_id": {
+    "$oid": "61354f2748a0c53e1ac14eaa"
+  },
+  "code": 80,
+  "prov_name": "Luapula",
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613549407d04d2aafb909f2f"
+  },
+  "code": 10,
+  "prov_name": "Lusaka",
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613549c87d04d2aafb909f33"
+  },
+  "code": 20,
+  "prov_name": "Southern",
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "61354f1948a0c53e1ac14ea8"
+  },
+  "code": 70,
+  "prov_name": "Eastern",
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "61354ef548a0c53e1ac14ea4"
+  },
+  "code": 50,
+  "prov_name": "Central",
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "61354ca42bf97b6b5894bcf0"
+  },
+  "code": 40,
+  "prov_name": "Copperbelt",
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "61354f3648a0c53e1ac14eac"
+  },
+  "code": 90,
+  "prov_name": "Western",
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "6135496b7d04d2aafb909f31"
+  },
+  "code": 30,
+  "prov_name": "Northern",
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "61354f4748a0c53e1ac14eae"
+  },
+  "code": 91,
+  "prov_name": "Muchinga",
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "61354f0648a0c53e1ac14ea6"
+  },
+  "code": 60,
+  "prov_name": "North Western",
+  "__v": 0
+}]

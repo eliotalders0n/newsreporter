@@ -1,0 +1,766 @@
+[{
+  "_id": {
+    "$oid": "613558cb2e010cfe382b7c89"
+  },
+  "code": 1047,
+  "town_name": "CHIENGI                       ",
+  "prov_name": "Luapula",
+  "prov_code": 80,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c82e010cfe382b7c3f"
+  },
+  "code": 2008,
+  "town_name": "LIVINGSTONE                   ",
+  "prov_name": "Southern",
+  "prov_code": 20,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c92e010cfe382b7c6d"
+  },
+  "code": 2000,
+  "town_name": "KABWE                         ",
+  "prov_name": "Central",
+  "prov_code": 50,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c92e010cfe382b7c75"
+  },
+  "code": 1008,
+  "town_name": "CHIBOMBO",
+  "prov_name": "Central",
+  "prov_code": 50,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cb2e010cfe382b7ca3"
+  },
+  "code": 1057,
+  "town_name": "MUNGWI                        ",
+  "prov_name": "Northern",
+  "prov_code": 30,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cc2e010cfe382b7cb1"
+  },
+  "code": 2031,
+  "town_name": "CHAVUMA",
+  "prov_name": "North Western",
+  "prov_code": 60,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cc2e010cfe382b7cd3"
+  },
+  "code": 2027,
+  "town_name": "SINDA                         ",
+  "prov_name": "Eastern",
+  "prov_code": 70,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c92e010cfe382b7c79"
+  },
+  "code": 1012,
+  "town_name": "CHISAMBA",
+  "prov_name": "Central",
+  "prov_code": 50,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c82e010cfe382b7c49"
+  },
+  "code": 2013,
+  "town_name": "ITEZHI-TEZHI                  ",
+  "prov_name": "Southern",
+  "prov_code": 20,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c82e010cfe382b7c3d"
+  },
+  "code": 2007,
+  "town_name": "KALOMO                        ",
+  "prov_name": "Southern",
+  "prov_code": 20,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cb2e010cfe382b7c95"
+  },
+  "code": 2042,
+  "town_name": "KANCHIBIYA",
+  "prov_name": "Muchinga",
+  "prov_code": 91,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cb2e010cfe382b7c9b"
+  },
+  "code": 1053,
+  "town_name": "LUWINGU                       ",
+  "prov_name": "Northern",
+  "prov_code": 30,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cc2e010cfe382b7cc5"
+  },
+  "code": 2032,
+  "town_name": "NYIMBA",
+  "prov_name": "Eastern",
+  "prov_code": 70,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c82e010cfe382b7c5b"
+  },
+  "code": 1010,
+  "town_name": "SIAVONGA",
+  "prov_name": "Lusaka",
+  "prov_code": 10,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cb2e010cfe382b7c83"
+  },
+  "code": 1044,
+  "town_name": "KAWAMBWA                      ",
+  "prov_name": "Luapula",
+  "prov_code": 80,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cb2e010cfe382b7c7b"
+  },
+  "code": 1040,
+  "town_name": "MANSA                         ",
+  "prov_name": "Luapula",
+  "prov_code": 80,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cc2e010cfe382b7cb7"
+  },
+  "code": 2040,
+  "town_name": "SIKONGO",
+  "prov_name": "Western",
+  "prov_code": 90,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cc2e010cfe382b7cbf"
+  },
+  "code": 2019,
+  "town_name": "SENANGA                       ",
+  "prov_name": "Western",
+  "prov_code": 90,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cc2e010cfe382b7ccb"
+  },
+  "code": 2023,
+  "town_name": "KATETE                        ",
+  "prov_name": "Eastern",
+  "prov_code": 70,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cc2e010cfe382b7cad"
+  },
+  "code": 1038,
+  "town_name": "KASEMPA                       ",
+  "prov_name": "North Western",
+  "prov_code": 60,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c82e010cfe382b7c43"
+  },
+  "code": 2010,
+  "town_name": "MAZABUKA                      ",
+  "prov_name": "Southern",
+  "prov_code": 20,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cc2e010cfe382b7cb3"
+  },
+  "code": 0,
+  "town_name": "MANYINGA",
+  "prov_name": "North Western",
+  "prov_code": 60,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cc2e010cfe382b7cbd"
+  },
+  "code": 2018,
+  "town_name": "MONGU                         ",
+  "prov_name": "Western",
+  "prov_code": 90,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cc2e010cfe382b7caf"
+  },
+  "code": 1039,
+  "town_name": "MUFUMBWE                      ",
+  "prov_name": "North Western",
+  "prov_code": 60,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c82e010cfe382b7c55"
+  },
+  "code": 1002,
+  "town_name": "KAFUE",
+  "prov_name": "Lusaka",
+  "prov_code": 10,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c82e010cfe382b7c61"
+  },
+  "code": 1032,
+  "town_name": "MUFULIRA                      ",
+  "prov_name": "Copperbelt",
+  "prov_code": 40,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c82e010cfe382b7c41"
+  },
+  "code": 2009,
+  "town_name": "SESHEKE                       ",
+  "prov_name": "Southern",
+  "prov_code": 20,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c72e010cfe382b7c35"
+  },
+  "code": 2030,
+  "town_name": "CHISEKESI                     ",
+  "prov_name": "Southern",
+  "prov_code": 20,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c92e010cfe382b7c71"
+  },
+  "code": 2002,
+  "town_name": "SERENJE                       ",
+  "prov_name": "Central",
+  "prov_code": 50,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c72e010cfe382b7c31"
+  },
+  "code": 2035,
+  "town_name": "ZIMBA",
+  "prov_name": "Southern",
+  "prov_code": 20,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c82e010cfe382b7c4f"
+  },
+  "code": 2041,
+  "town_name": "RUFUNSA",
+  "prov_name": "Lusaka",
+  "prov_code": 10,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c92e010cfe382b7c73"
+  },
+  "code": 2003,
+  "town_name": "KAPIRI MPOSHI                 ",
+  "prov_name": "Central",
+  "prov_code": 50,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cc2e010cfe382b7cb9"
+  },
+  "code": 2016,
+  "town_name": "KAOMA                         ",
+  "prov_name": "Western",
+  "prov_code": 90,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c92e010cfe382b7c63"
+  },
+  "code": 1033,
+  "town_name": "CHILILABOMBWE                 ",
+  "prov_name": "Copperbelt",
+  "prov_code": 40,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cc2e010cfe382b7cab"
+  },
+  "code": 1037,
+  "town_name": "ZAMBEZI                       ",
+  "prov_name": "North Western",
+  "prov_code": 60,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cb2e010cfe382b7c7f"
+  },
+  "code": 1042,
+  "town_name": "MWENSE                        ",
+  "prov_name": "Luapula",
+  "prov_code": 80,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c72e010cfe382b7c39"
+  },
+  "code": 2005,
+  "town_name": "MAAMBA                        ",
+  "prov_name": "Southern",
+  "prov_code": 20,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c82e010cfe382b7c53"
+  },
+  "code": 1001,
+  "town_name": "LUSAKA",
+  "prov_name": "Lusaka",
+  "prov_code": 10,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cc2e010cfe382b7cc3"
+  },
+  "code": 2036,
+  "town_name": "SIOMA",
+  "prov_name": "Western",
+  "prov_code": 90,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cb2e010cfe382b7c87"
+  },
+  "code": 1046,
+  "town_name": "KAPUTA                        ",
+  "prov_name": "Luapula",
+  "prov_code": 80,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cc2e010cfe382b7cd5"
+  },
+  "code": 2028,
+  "town_name": "CHAMA                         ",
+  "prov_name": "Eastern",
+  "prov_code": 70,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c82e010cfe382b7c5d"
+  },
+  "code": 1030,
+  "town_name": "CHINGOLA                      ",
+  "prov_name": "Copperbelt",
+  "prov_code": 40,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c82e010cfe382b7c4b"
+  },
+  "code": 2014,
+  "town_name": "MONZE                         ",
+  "prov_name": "Southern",
+  "prov_code": 20,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cc2e010cfe382b7ca7"
+  },
+  "code": 1035,
+  "town_name": "MWINILUNGA                    ",
+  "prov_name": "North Western",
+  "prov_code": 60,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c72e010cfe382b7c33"
+  },
+  "code": 2043,
+  "town_name": "KAZUNGULA",
+  "prov_name": "Southern",
+  "prov_code": 20,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cb2e010cfe382b7c8f"
+  },
+  "code": 1050,
+  "town_name": "CHINSALI                      ",
+  "prov_name": "Muchinga",
+  "prov_code": 91,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c72e010cfe382b7c3b"
+  },
+  "code": 2006,
+  "town_name": "GWEMBE                        ",
+  "prov_name": "Southern",
+  "prov_code": 20,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cc2e010cfe382b7cd7"
+  },
+  "code": 2029,
+  "town_name": "LUANGWA                       ",
+  "prov_name": "Eastern",
+  "prov_code": 70,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cc2e010cfe382b7ca5"
+  },
+  "code": 1034,
+  "town_name": "SOLWEZI                       ",
+  "prov_name": "North Western",
+  "prov_code": 60,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cc2e010cfe382b7cbb"
+  },
+  "code": 2017,
+  "town_name": "LUKULU                        ",
+  "prov_name": "Western",
+  "prov_code": 90,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c92e010cfe382b7c65"
+  },
+  "code": 1003,
+  "town_name": "NDOLA                         ",
+  "prov_name": "Copperbelt",
+  "prov_code": 40,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cc2e010cfe382b7cc1"
+  },
+  "code": 2020,
+  "town_name": "KALABO                        ",
+  "prov_name": "Western",
+  "prov_code": 90,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cc2e010cfe382b7ccf"
+  },
+  "code": 2025,
+  "town_name": "MFUWE                         ",
+  "prov_name": "Eastern",
+  "prov_code": 70,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c82e010cfe382b7c57"
+  },
+  "code": 1007,
+  "town_name": "CHONGWE",
+  "prov_name": "Lusaka",
+  "prov_code": 10,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c82e010cfe382b7c4d"
+  },
+  "code": 2015,
+  "town_name": "PEMBA                         ",
+  "prov_name": "Southern",
+  "prov_code": 20,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c92e010cfe382b7c69"
+  },
+  "code": 1005,
+  "town_name": "KALULUSHI                     ",
+  "prov_name": "Copperbelt",
+  "prov_code": 40,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cc2e010cfe382b7cc7"
+  },
+  "code": 2021,
+  "town_name": "CHIPATA                       ",
+  "prov_name": "Eastern",
+  "prov_code": 70,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c72e010cfe382b7c37"
+  },
+  "code": 2004,
+  "town_name": "CHOMA                         ",
+  "prov_name": "Southern",
+  "prov_code": 20,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cc2e010cfe382b7ccd"
+  },
+  "code": 2024,
+  "town_name": "LUNDAZI                       ",
+  "prov_name": "Eastern",
+  "prov_code": 70,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cc2e010cfe382b7ca9"
+  },
+  "code": 1036,
+  "town_name": "KABOMPO                       ",
+  "prov_name": "North Western",
+  "prov_code": 60,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cb2e010cfe382b7c97"
+  },
+  "code": 6506,
+  "town_name": "MAFINGA",
+  "prov_name": "Muchinga",
+  "prov_code": 91,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cb2e010cfe382b7c8b"
+  },
+  "code": 1058,
+  "town_name": "SHIWANG'ANDU",
+  "prov_name": "Muchinga",
+  "prov_code": 91,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cb2e010cfe382b7c99"
+  },
+  "code": 1048,
+  "town_name": "KASAMA                        ",
+  "prov_name": "Northern",
+  "prov_code": 30,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c92e010cfe382b7c6b"
+  },
+  "code": 2034,
+  "town_name": "CHAMBISHI",
+  "prov_name": "Copperbelt",
+  "prov_code": 40,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c82e010cfe382b7c59"
+  },
+  "code": 1009,
+  "town_name": "CHIRUNDU",
+  "prov_name": "Lusaka",
+  "prov_code": 10,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c82e010cfe382b7c47"
+  },
+  "code": 2012,
+  "town_name": "SINAZONGWE                    ",
+  "prov_name": "Southern",
+  "prov_code": 20,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cb2e010cfe382b7c85"
+  },
+  "code": 1045,
+  "town_name": "NCHELENGE                     ",
+  "prov_name": "Luapula",
+  "prov_code": 80,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cb2e010cfe382b7c9d"
+  },
+  "code": 1054,
+  "town_name": "MPOROKOSO                     ",
+  "prov_name": "Northern",
+  "prov_code": 30,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cb2e010cfe382b7c8d"
+  },
+  "code": 1049,
+  "town_name": "MPIKA                         ",
+  "prov_name": "Muchinga",
+  "prov_code": 91,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cb2e010cfe382b7c9f"
+  },
+  "code": 1055,
+  "town_name": "MBALA                         ",
+  "prov_name": "Northern",
+  "prov_code": 30,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cc2e010cfe382b7cc9"
+  },
+  "code": 2022,
+  "town_name": "CHADIZA                       ",
+  "prov_name": "Eastern",
+  "prov_code": 70,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c82e010cfe382b7c5f"
+  },
+  "code": 1031,
+  "town_name": "LUANSHYA                      ",
+  "prov_name": "Copperbelt",
+  "prov_code": 40,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c92e010cfe382b7c67"
+  },
+  "code": 1004,
+  "town_name": "KITWE                         ",
+  "prov_name": "Copperbelt",
+  "prov_code": 40,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cb2e010cfe382b7c7d"
+  },
+  "code": 1041,
+  "town_name": "SAMFYA                        ",
+  "prov_name": "Luapula",
+  "prov_code": 80,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cb2e010cfe382b7c91"
+  },
+  "code": 1051,
+  "town_name": "ISOKA                         ",
+  "prov_name": "Muchinga",
+  "prov_code": 91,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cc2e010cfe382b7cd1"
+  },
+  "code": 2026,
+  "town_name": "PETAUKE                       ",
+  "prov_name": "Eastern",
+  "prov_code": 70,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c92e010cfe382b7c77"
+  },
+  "code": 1011,
+  "town_name": "MUMBWA",
+  "prov_name": "Central",
+  "prov_code": 50,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cb2e010cfe382b7c81"
+  },
+  "code": 1043,
+  "town_name": "MBERESHI                      ",
+  "prov_name": "Luapula",
+  "prov_code": 80,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cb2e010cfe382b7c93"
+  },
+  "code": 1052,
+  "town_name": "NAKONDE                       ",
+  "prov_name": "Muchinga",
+  "prov_code": 91,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c92e010cfe382b7c6f"
+  },
+  "code": 2001,
+  "town_name": "MKUSHI                        ",
+  "prov_name": "Central",
+  "prov_code": 50,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cb2e010cfe382b7ca1"
+  },
+  "code": 1056,
+  "town_name": "MPULUNGU                      ",
+  "prov_name": "Northern",
+  "prov_code": 30,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cc2e010cfe382b7cb5"
+  },
+  "code": 2033,
+  "town_name": "SHANG'OMBO",
+  "prov_name": "Western",
+  "prov_code": 90,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c82e010cfe382b7c51"
+  },
+  "code": 2038,
+  "town_name": "CHILANGA",
+  "prov_name": "Lusaka",
+  "prov_code": 10,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558cd2e010cfe382b7cd9"
+  },
+  "code": 2037,
+  "town_name": "VUBWI",
+  "prov_name": "Eastern",
+  "prov_code": 70,
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "613558c82e010cfe382b7c45"
+  },
+  "code": 2011,
+  "town_name": "NAMWALA                       ",
+  "prov_name": "Southern",
+  "prov_code": 20,
+  "__v": 0
+}]
