@@ -1,5 +1,4 @@
-import React from "react";
-// import { useEffect, useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Row,
@@ -12,7 +11,6 @@ import {
   Button,
   Modal,
 } from "react-bootstrap";
-import { useState, useEffect } from "react";
 import firebase from "./../../firebase";
 import AddArticle from "./addArticle";
 import { Skeleton } from "@mui/material";
@@ -22,49 +20,70 @@ import { useTheme } from "../template/themeContext";
 function Landing(props) {
   const navigate = useNavigate();
   const { theme } = useTheme();
-  const [loading, setLoading] = useState(true); // State to track loading status
-
+  const [loading, setLoading] = useState(true);
   const [articles, setArticles] = useState([]);
   const [authors, setAuthors] = useState({});
+  const [ministries, setMinistries] = useState({}); // To store ministries data
 
-  useEffect(() => {
-    // Load articles from Firestore on component mount
-    const unsubscribeArticles = firebase
-      .firestore()
-      .collection("Articles")
-      .where("status", "==", "approved")
-      .where("video", "==", false)
-      .orderBy("createdAt", "desc")
-      .onSnapshot((snapshot) => {
-        const articles = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setLoading(false);
-        setArticles(articles);
-      });
+  // Fetch articles and authors with useCallback to avoid re-fetching on re-renders
+  const fetchData = useCallback(async () => {
+    try {
+      const articlesSnapshot = await firebase
+        .firestore()
+        .collection("Articles")
+        .where("status", "==", "approved")
+        .where("video", "==", false)
+        .orderBy("createdAt", "desc")
+        .get();
 
-    // Load authors from Firestore
-    const unsubscribeAuthors = firebase
-      .firestore()
-      .collection("Users")
-      .onSnapshot((snapshot) => {
-        const authorsData = {};
-        snapshot.docs.forEach((doc) => {
-          authorsData[doc.id] = doc.data();
-        });
-        setLoading(false);
-        setAuthors(authorsData);
-      });
+      const articlesData = articlesSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
-    return () => {
-      unsubscribeArticles();
-      unsubscribeAuthors();
-    };
+      const authorsSnapshot = await firebase
+        .firestore()
+        .collection("Users")
+        .get();
+
+      const authorsData = authorsSnapshot.docs.reduce((acc, doc) => {
+        acc[doc.id] = doc.data();
+        return acc;
+      }, {});
+
+      setArticles(articlesData);
+      setAuthors(authorsData);
+
+      // Fetch ministries data
+      const ministriesIds = [
+        ...new Set(
+          articlesData.map((article) => authorsData[article.author]?.ministry)
+        ),
+      ];
+      const ministriesPromises = ministriesIds.map((id) =>
+        firebase.firestore().collection("Ministries").doc(id).get()
+      );
+      const ministriesSnapshot = await Promise.all(ministriesPromises);
+      const ministriesData = ministriesSnapshot.reduce((acc, doc) => {
+        if (doc.exists) {
+          acc[doc.id] = doc.data();
+        }
+        return acc;
+      }, {});
+
+      setMinistries(ministriesData);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setLoading(false);
+    }
   }, []);
 
-  const [showShare, setShowShare] = useState(false);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
+  const [showShare, setShowShare] = useState(false);
   const handleShareClose = () => setShowShare(false);
   const handleShareShow = () => setShowShare(true);
 
@@ -95,15 +114,13 @@ function Landing(props) {
         <p className="p-2 ms-auto"></p>
       </Stack>
       <Row>
-        {loading ? ( // Render Skeleton while loading is true
+        {loading ? (
           <Stack spacing={1}>
-            {/* For variant="text", adjust the height via font-size */}
             <Skeleton
               variant="rounded"
               sx={{ fontSize: "3rem", bgcolor: "grey" }}
             />
             <br />
-            {/* For other variants, adjust the size with `width` and `height` */}
             <Skeleton
               variant="circular"
               sx={{ bgcolor: "grey" }}
@@ -125,13 +142,11 @@ function Landing(props) {
               height={60}
             />
             <br />
-            {/* For variant="text", adjust the height via font-size */}
             <Skeleton
               variant="rounded"
               sx={{ fontSize: "3rem", bgcolor: "grey" }}
             />
             <br />
-            {/* For other variants, adjust the size with `width` and `height` */}
             <Skeleton
               variant="circular"
               sx={{ bgcolor: "grey" }}
@@ -174,7 +189,7 @@ function Landing(props) {
                     minWidth: "38vh",
                     border: "none",
                     backgroundColor: theme === "light" ? "white" : "black",
-        color: theme === "light" ? "black" : "white",
+                    color: theme === "light" ? "black" : "white",
                   }}
                   onClick={() => navigate("/story")}
                 >
@@ -191,10 +206,10 @@ function Landing(props) {
                     <Card.Title
                       style={{
                         backgroundColor:
-                            theme === "light"
-                              ? "rgba(250,250,250,0.8)"
-                              : "rgba(50,50,50,0.5)",
-                          color: theme === "light" ? "black" : "white",
+                          theme === "light"
+                            ? "rgba(250,250,250,0.8)"
+                            : "rgba(50,50,50,0.5)",
+                        color: theme === "light" ? "black" : "white",
                         borderRadius: "10px",
                         padding: "1px",
                       }}
@@ -203,7 +218,9 @@ function Landing(props) {
                     </Card.Title>
                     <Card.Subtitle className="mb-2 text-muted">
                       <Badge bg="danger">
-                        {authors[article.author]?.ministry}
+                        {/* {authors[article.author]?.ministry} */}
+                        {ministries[authors[article.author]?.ministry]?.name ||
+                          "Unknown Ministry"}
                       </Badge>
                     </Card.Subtitle>
                   </Card.Body>
@@ -230,8 +247,10 @@ function Landing(props) {
                   <Stack
                     direction="horizontal"
                     gap={2}
-                    style={{ backgroundColor: theme === "light" ? "white" : "black",
-                    color: theme === "light" ? "black" : "white", }}
+                    style={{
+                      backgroundColor: theme === "light" ? "white" : "black",
+                      color: theme === "light" ? "black" : "white",
+                    }}
                   >
                     <Image
                       src="assets/ministries/labour.png"
@@ -245,7 +264,7 @@ function Landing(props) {
                   <Card.Text
                     style={{
                       backgroundColor: theme === "light" ? "white" : "black",
-        color: theme === "light" ? "black" : "white",
+                      color: theme === "light" ? "black" : "white",
                       fontSize: "10px",
                       margin: "2px 5px",
                     }}
@@ -260,14 +279,22 @@ function Landing(props) {
         )}
       </Row>
       <Modal show={showShare} onHide={handleShareClose}>
-        <Modal.Body style={{ backgroundColor: theme === "light" ? "white" : "black",
-        color: theme === "light" ? "black" : "white", }}>
+        <Modal.Body
+          style={{
+            backgroundColor: theme === "light" ? "white" : "black",
+            color: theme === "light" ? "black" : "white",
+          }}
+        >
           <h2 className="text-center display-3">Submit Report</h2>
           <br />
           <AddArticle />
         </Modal.Body>
-        <Modal.Footer style={{ backgroundColor: theme === "light" ? "white" : "black",
-        color: theme === "light" ? "black" : "white", }}>
+        <Modal.Footer
+          style={{
+            backgroundColor: theme === "light" ? "white" : "black",
+            color: theme === "light" ? "black" : "white",
+          }}
+        >
           <Button variant="dark" onClick={handleShareClose}>
             X
           </Button>

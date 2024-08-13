@@ -68,7 +68,10 @@ export default function LoginForm() {
       const userStatus = userDoc.data().status;
       // console.log("Successfully taken role : " + userRole);
       // Check if the user is a reporter
-      if (userRole === "reporter" && userStatus === "Approved") {
+      if (
+        (userRole === "reporter" || userRole === "admin") &&
+        userStatus === "Approved"
+      ) {
         console.log("Successfully logged in!");
         setLoggedin(true);
         return <Navigate to="/home" />;
@@ -134,7 +137,18 @@ export default function LoginForm() {
                 autoComplete="current-password"
               />
               {error && (
-                <Typography variant="body2" color="error" style={{ backgroundColor: "darkred", fontSize: "14px", color: "white", borderRadius: "5px", padding: "6px" }} align="center">
+                <Typography
+                  variant="body2"
+                  color="error"
+                  style={{
+                    backgroundColor: "darkred",
+                    fontSize: "14px",
+                    color: "white",
+                    borderRadius: "5px",
+                    padding: "6px",
+                  }}
+                  align="center"
+                >
                   {error}
                 </Typography>
               )}

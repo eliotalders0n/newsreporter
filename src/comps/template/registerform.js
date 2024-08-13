@@ -173,7 +173,11 @@ export default function RegisterForm() {
         })
         .catch((error) => {
           var errorMessage = error.message;
-          alert("Error sending verification email, " + errorMessage + " Please check your email for verification and wait for your account to be approved");
+          alert(
+            "Error sending verification email, " +
+              errorMessage +
+              " Please check your email for verification and wait for your account to be approved"
+          );
         });
     } else {
       console.error(
@@ -407,7 +411,7 @@ export default function RegisterForm() {
                         <em>None</em>
                       </MenuItem>
                       {Ministries.map((ministry) => (
-                        <MenuItem value={ministry.name}>
+                        <MenuItem value={ministry.id}>
                           {ministry.description}
                         </MenuItem>
                       ))}
