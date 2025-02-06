@@ -1,21 +1,34 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import Registerform from "./comps/template/registerform";
-import LoginForm from "./comps/template/signinform";
-import StatusPage from "./comps/template/status";
-import ResetPasswordForm from "./comps/template/resetPassword";
+import { Routes, Route, useLocation } from "react-router-dom";
+import Landing from "./comps/pages/landingPage";
+import Profile from "./comps/pages/profile";
+import Header from "./comps/template/head";
+import Navigation from "./comps/template/navigation";
+import Story from "./comps/pages/story";
+import ReportsTabs from "./comps/pages/reels";
 
-// ----------------------------------------------------------------------
+function RoutesWrapper() {
+  const location = useLocation();
 
-export default function LoginRoutes() {
+  // Determine if Navigation should be displayed
+  const shouldShowNavigation = !location.pathname.startsWith("/story/");
+
   return (
-    <BrowserRouter>
+    <>
+      {shouldShowNavigation && <Header />}
       <Routes>
-        <Route exact path="/" element={<LoginForm />} />
-        <Route path="/login" element={<LoginForm />} />
-        <Route path="/resetPassword" element={<ResetPasswordForm />} />
-        <Route path="/register" element={<Registerform />} />
-        <Route path="/statuspage" element={<StatusPage />} />
+        <Route exact path="/" element={<Landing />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/home" element={<Landing />} />
+        <Route path="/story/:id" element={<Story />} />
+        <Route path="/reels" element={<ReportsTabs />} />
       </Routes>
-    </BrowserRouter>
+      {shouldShowNavigation && <Navigation />}
+    </>
   );
 }
+
+function LoginRoutes() {
+  return <RoutesWrapper />;
+}
+
+export default LoginRoutes;

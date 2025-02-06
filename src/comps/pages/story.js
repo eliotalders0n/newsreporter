@@ -1,29 +1,48 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
-  Card,
-  Stack,
-  Image,
+  Box,
+  Typography,
+  Avatar,
+  IconButton,
   Button,
-  Form,
-  InputGroup,
-  Modal,
-  Row,
-  Col,
-} from "react-bootstrap";
-import { useLocation } from "react-router-dom";
+  Container,
+  Card,
+  CardContent,
+  CardMedia,
+  TextField,
+  Stack,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  AppBar,
+  Toolbar,
+  InputAdornment,
+  Paper,
+  Divider,
+  useMediaQuery,
+} from "@mui/material";
 import {
-  TwitterShareButton,
-  WhatsappShareButton,
-  FacebookShareButton,
-  TelegramShareButton,
-} from "react-share";
-import useGetUser from "../hooks/useGetUser";
+  ArrowBack,
+  ThumbUp,
+  ThumbUpOutlined,
+  ThumbDown,
+  ThumbDownOutlined,
+  Comment as CommentIcon,
+} from "@mui/icons-material";
+import Lightbox from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
 import firebase from "../../firebase";
-// import useGetComments from "../hooks/useGetComments";
-import { useTheme } from "../template/themeContext";
+import useGetUser from "../hooks/useGetUser";
+import { useTheme as useCustomTheme } from "../template/themeContext";
+import getTimeSincePostCreation from "../template/getTimeSincePostCreation";
 
 function Story() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { theme: appTheme } = useCustomTheme();
+  // const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { data } = location.state || {};
   const [expanded, setExpanded] = useState(false);
   const [comments, setComments] = useState([]);
@@ -32,23 +51,24 @@ function Story() {
   const [disliked, setDisliked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [dislikesCount, setDislikesCount] = useState(0);
-
-  const author = useGetUser(data.author).docs;
-  // console.log("Author data:", author);
-
-  const [user, setUser] = useState({});
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState({});
+  const author = useGetUser(data?.author).docs;
+  const commentInputRef = useRef(null);
 
-  useEffect(() => {
-    const authUnsubscribe = firebase
-      .auth()
-      .onAuthStateChanged((loggedInUser) => {
+  const imageData =
+    data?.imagesUrls?.map((url) => ({ src: url, alt: "" })) || [];
+  const createdAt = data?.createdAt
+    ? getTimeSincePostCreation(data.createdAt.seconds)
+    : "";
+
+    useEffect(() => {
+      const authUnsubscribe = firebase.auth().onAuthStateChanged((loggedInUser) => {
         if (loggedInUser) {
           setIsLoggedIn(true);
-          const userDocRef = firebase
-            .firestore()
-            .collection("Users")
-            .doc(loggedInUser.uid);
+          const userDocRef = firebase.firestore().collection("app_users").doc(loggedInUser.uid);
           const unsubscribe = userDocRef.onSnapshot((doc) => {
             setUser(doc.data());
           });
@@ -58,429 +78,412 @@ function Story() {
           setUser({});
         }
       });
-
-    return () => authUnsubscribe();
-  }, []);
-
-  const loadComments = async () => {
-    const commentsSnapshot = await firebase
-      .firestore()
-      .collection("Comments")
-      .orderBy("timestamp", "desc")
-      .where("article_id", "==", data.id)
-      .get();
-    const commentsData = commentsSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    setComments(commentsData);
-  };
-
-  useEffect(() => {
-    loadComments();
-  }, []);
-
-  const handleComment = async (event) => {
-    event.preventDefault();
-    try {
-      if (newComment.trim() !== "") {
-        await firebase.firestore().collection("Comments").add({
-          article_id: data.id,
-          authorId: firebase.auth().currentUser.uid,
-          content: newComment,
-          author: user.firstName,
-          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        });
-        setNewComment("");
-        loadComments();
-        console.log(" comments : " + comments);
-      }
-    } catch (error) {
-      console.error("Error adding comment:", error);
-      alert("Failed to add comment. Please try again.");
-    }
-  };
-
-  useEffect(() => {
-    const checkLikeStatus = async () => {
+  
+      return () => authUnsubscribe();
+    }, []);
+  
+    // console.log("user: " + user);
+    useEffect(() => {
+      const loadComments = async () => {
+        try {
+          const commentsSnapshot = await firebase
+            .firestore()
+            .collection("Comments")
+            .orderBy("timestamp", "asc")
+            .where("article_id", "==", data.id)
+            .get();
+          const commentsData = commentsSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          await fetchAuthorsDetails(commentsData);
+        } catch (error) {
+          console.error("Error loading comments:", error);
+        }
+      };
+  
+      const fetchAuthorsDetails = async (commentsData) => {
+        const authorsDetails = {};
+        for (const comment of commentsData) {
+          if (!authorsDetails[comment.authorId]) {
+            const userDoc = await firebase
+              .firestore()
+              .collection("Users")
+              .doc(comment.authorId)
+              .get();
+            authorsDetails[comment.authorId] = userDoc.data();
+          }
+          comment.authorDetails = authorsDetails[comment.authorId];
+        }
+        setComments(commentsData);
+      };
+  
+      loadComments();
+    }, [data.id]);
+  
+    const handleComment = async (event) => {
+      event.preventDefault();
       try {
-        const likeSnapshot = await firebase
-          .firestore()
-          .collection("Reactions")
-          .where("article_id", "==", data.id)
-          .where("liked", "==", true)
-          .get();
-        setLikesCount(likeSnapshot.size);
-
-        const dislikeSnapshot = await firebase
-          .firestore()
-          .collection("Reactions")
-          .where("article_id", "==", data.id)
-          .where("liked", "==", false)
-          .get();
-        setDislikesCount(dislikeSnapshot.size);
-
-        // Check if the current user has already liked/disliked the article
-        const currentUserLike = likeSnapshot.docs.find(
-          (doc) => doc.data().user_id === firebase.auth().currentUser.uid
-        );
-        setLiked(!!currentUserLike);
-       
-
-        const currentUserDislike = dislikeSnapshot.docs.find(
-          (doc) => doc.data().user_id === firebase.auth().currentUser.uid
-        );
-        setDisliked(!!currentUserDislike);
+        if (newComment.trim() !== "") {
+          await firebase.firestore().collection("Comments").add({
+            article_id: data.id,
+            authorId: firebase.auth().currentUser.uid,
+            content: newComment,
+            author: user.name,
+            authorPhoto: user.photoURL,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+          setNewComment("");
+          // Update comments state without fetching from Firestore again
+          setComments((prevComments) => [
+            ...prevComments,
+            {
+              id: Math.random().toString(36).substr(2, 9), // Generate temporary ID
+              article_id: data.id,
+              authorId: firebase.auth().currentUser.uid,
+              content: newComment,
+              author: user.name,
+              authorPhoto: user.photoURL,
+              timestamp: new Date(),
+            },
+          ]);
+        }
       } catch (error) {
-        console.error("Error checking like/dislike status:", error);
+        console.error("Error adding comment:", error);
+        alert("Failed to add comment. Please try again.");
       }
     };
+  
+    useEffect(() => {
+      const checkLikeStatus = async () => {
+        try {
+          const likeSnapshot = await firebase
+            .firestore()
+            .collection("Reactions")
+            .where("article_id", "==", data.id)
+            .where("liked", "==", true)
+            .get();
+          setLikesCount(likeSnapshot.size);
+  
+          const dislikeSnapshot = await firebase
+            .firestore()
+            .collection("Reactions")
+            .where("article_id", "==", data.id)
+            .where("liked", "==", false)
+            .get();
+          setDislikesCount(dislikeSnapshot.size);
+  
+          // Check if the current user has already liked/disliked the article
+          const currentUserLike = likeSnapshot.docs.find(
+            (doc) => doc.data().user_id === firebase.auth().currentUser.uid
+          );
+          setLiked(!!currentUserLike);
+  
+          const currentUserDislike = dislikeSnapshot.docs.find(
+            (doc) => doc.data().user_id === firebase.auth().currentUser.uid
+          );
+          setDisliked(!!currentUserDislike);
+        } catch (error) {
+          console.error("Error checking like/dislike status:", error);
+        }
+      };
+  
+      checkLikeStatus();
+    }, [data.id]);
 
-    checkLikeStatus();
-  }, [data.id]);
-
+  // Reaction handling
   const handleLike = async () => {
+    setLoading(true); // Set loading to true
     try {
-      await firebase.firestore().collection("Reactions").add({
-        article_id: data.id,
-        user_id: firebase.auth().currentUser.uid,
-        liked: true,
-      });
-      console.log("like status: " + liked)
+      const reactionsRef = firebase.firestore().collection("Reactions");
+      const reactionSnapshot = await reactionsRef
+        .where("article_id", "==", data.id)
+        .where("user_id", "==", firebase.auth().currentUser.uid)
+        .get();
+
+      if (!reactionSnapshot.empty) {
+        const reactionDoc = reactionSnapshot.docs[0];
+        const currentReaction = reactionDoc.data();
+
+        if (currentReaction.liked) {
+          // Already liked, do nothing
+          return;
+        } else {
+          // Previously disliked, update to liked
+          await reactionsRef.doc(reactionDoc.id).update({ liked: true });
+          setLiked(true);
+          setDisliked(false);
+          setLikesCount((prev) => prev + 1);
+          setDislikesCount((prev) => prev - 1);
+        }
+      } else {
+        // No reaction yet, add new like
+        await reactionsRef.add({
+          article_id: data.id,
+          user_id: firebase.auth().currentUser.uid,
+          liked: true,
+        });
+        setLiked(true);
+        setLikesCount((prev) => prev + 1);
+      }
     } catch (error) {
       console.error("Error liking article:", error);
       alert("Failed to like article. Please try again.");
+    } finally {
+      setLoading(false); // Set loading to false
     }
   };
 
   const handleDislike = async () => {
+    setLoading(true); // Set loading to true
     try {
-      await firebase.firestore().collection("Reactions").add({
-        article_id: data.id,
-        user_id: firebase.auth().currentUser.uid,
-        liked: false,
-      });
-      console.log("like status: " + liked)
+      const reactionsRef = firebase.firestore().collection("Reactions");
+      const reactionSnapshot = await reactionsRef
+        .where("article_id", "==", data.id)
+        .where("user_id", "==", firebase.auth().currentUser.uid)
+        .get();
+
+      if (!reactionSnapshot.empty) {
+        const reactionDoc = reactionSnapshot.docs[0];
+        const currentReaction = reactionDoc.data();
+
+        if (currentReaction.liked === false) {
+          // Already disliked, do nothing
+          return;
+        } else {
+          // Previously liked, update to disliked
+          await reactionsRef.doc(reactionDoc.id).update({ liked: false });
+          setDisliked(true);
+          setLiked(false);
+          setDislikesCount((prev) => prev + 1);
+          setLikesCount((prev) => prev - 1);
+        }
+      } else {
+        // No reaction yet, add new dislike
+        await reactionsRef.add({
+          article_id: data.id,
+          user_id: firebase.auth().currentUser.uid,
+          liked: false,
+        });
+        setDisliked(true);
+        setDislikesCount((prev) => prev + 1);
+      }
     } catch (error) {
       console.error("Error disliking article:", error);
       alert("Failed to dislike article. Please try again.");
+    } finally {
+      setLoading(false); // Set loading to false
     }
   };
-  
-  const handleClick = () => {
-    setExpanded(!expanded);
-  };
-
-  const [showShare, setShowShare] = useState(false);
-
-  const handleShareClose = () => setShowShare(false);
-  const handleShareShow = () => setShowShare(true);
-
-  // const Comments = useGetComments().docs;
-
-  const { theme } = useTheme();
-
-  const [authors, setAuthors] = useState({});
-  useEffect(() => {
-    const unsubscribeAuthors = firebase
-      .firestore()
-      .collection("Users")
-      .onSnapshot((snapshot) => {
-        const authorsData = {};
-        snapshot.docs.forEach((doc) => {
-          authorsData[doc.id] = doc.data();
-        });
-        setAuthors(authorsData);
-      });
-
-    return () => {
-      unsubscribeAuthors();
-    };
-  });
 
   return (
-    <div
-      style={{
-        backgroundColor: theme === "light" ? "white" : "black",
-        color: theme === "light" ? "black" : "white",
-        minHeight: "100vh",
-        padding: "12vh 0",
+    <Box
+      sx={{
+        pb: 8,
+        pt: { xs: 8, sm: 10 },
+        backgroundColor: appTheme === "light" ? "whitesmoke" : "#2C2C2C",
+        color: appTheme === "light" ? "#111111" : "white",
       }}
     >
-      <div>
-        <Stack
+      <AppBar
+        position="fixed"
+        color="default"
+        elevation={1}
+        style={{
+          backgroundColor: appTheme === "light" ? "whitesmoke" : "#2C2C2C",
+          color: appTheme === "light" ? "#111111" : "white",
+        }}
+      >
+        <Toolbar>
+          <IconButton edge="start" onClick={() => navigate(-1)}>
+            <ArrowBack />
+          </IconButton>
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ ml: 2 }}>
+            <Avatar
+              src={author?.photoURL || "/assets/profile.png"}
+              sx={{ width: 32, height: 32 }}
+            />
+            <Typography variant="subtitle1">
+              {author?.firstName || "user"} {author?.lastName || ""}
+            </Typography>
+          </Stack>
+        </Toolbar>
+      </AppBar>
+
+      <Container
+        maxWidth="md"
+        style={{
+          backgroundColor: appTheme === "light" ? "whitesmoke" : "#2C2C2C",
+          color: appTheme === "light" ? "#111111" : "white",
+        }}
+      >
+        <Card
+          elevation={0}
           style={{
-            backgroundColor: theme === "light" ? "white" : "black",
-            color: theme === "light" ? "black" : "white",
-            margin: "1vh 3vh",
+            backgroundColor: appTheme === "light" ? "whitesmoke" : "#2C2C2C",
+            color: appTheme === "light" ? "#111111" : "white",
           }}
         >
-          <h2 className="display-5">{data.title}</h2>
-          <Stack direction="horizontal">
-            <Image
-              src={authors[data.author]?.photoURL}
-              alt=""
-              style={{ width: "3vh", height: "3vh", marginRight: "5px" }}
-              roundedCircle
-            />
-            {author.firstName} {author.lastName}
-          </Stack>
-          <Card.Text
-            style={{
-              backgroundColor: theme === "light" ? "white" : "black",
-              color: theme === "light" ? "black" : "white",
-              fontSize: "14px",
-              margin: "1px 5px",
+          <Typography variant="h4" gutterBottom sx={{ mt: 2 }}>
+            {data?.title}
+          </Typography>
+
+          <Typography variant="caption">Posted {createdAt}</Typography>
+
+          <CardMedia
+            component="img"
+            image={data?.imagesUrls?.[0] || "/assets/Flag_of_Zambia.png"}
+            alt={data?.ministry}
+            sx={{
+              height: { xs: 300, sm: 400 },
+              mt: 2,
+              cursor: "pointer",
+              borderRadius: 1,
             }}
-          >
-            <span style={{ fontSize: "12px" }}>Posted 3 hours ago</span>
-            <br />
-            28 November 2023 . 2.4 Millions Readers
-          </Card.Text>
-          <br />
-          <Stack
-            style={{
-              position: "relative",
-              width: "100%",
-              height: "45vh",
-              borderRadius: "5%",
-              overflow: "hidden",
-              margin: "0",
-            }}
-          >
-            <Image
-              src={data.imagesUrls[0]}
-              alt={data.ministry}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
+            onClick={() => setLightboxOpen(true)}
+          />
+
+          <CardContent>
+            <Typography
+              variant="body1"
+              sx={{ mt: 2 }}
+              dangerouslySetInnerHTML={{
+                __html: expanded ? data.content : data.content.slice(0, 200),
               }}
-              rounded
             />
-          </Stack>
-          <Card.Text
-            style={{
-              backgroundColor: theme === "light" ? "white" : "black",
-              color: theme === "light" ? "black" : "white",
-              fontSize: "16px",
-              margin: "1px 5px",
-            }}
-          >
-            <br />
-            <div>
-              <p
-                dangerouslySetInnerHTML={{
-                  __html: expanded ? data.content : data.content.slice(0, 200),
-                }}
-              />
-              {/* {expanded ? data.content : data.content.slice(0, 200)} */}
-              {data.content.length > 200 && (
-                <Button
-                  size="sm"
-                  style={{ marginLeft: "3vh" }}
-                  variant="outline-primary"
-                  onClick={handleClick}
-                >
-                  {expanded ? "Click to Collapse" : "Click to Expand"}
-                </Button>
-              )}
-              {/* </p> */}
-            </div>
-          </Card.Text>
-          <hr />
-          {isLoggedIn ? (
-            <div>
-              {/* Your code to display user data */}
-              <Stack
-                direction="horizontal"
-                gap={5}
-                // className="justify-content-center"
-              >
-               
-                <i className="bi bi-share" onClick={handleShareShow}></i>
-                {/* Like button */}
-                <Stack
-                direction="horizontal"
-                gap={3}
-                className="justify-content-center p-2 ms-auto"
-              >
-                {liked ? (
-                  <i
-                    className="bi bi-hand-thumbs-up-fill"
-                    onClick={handleLike}
-                  ></i>
-                ) : (
-                  <i className="bi bi-hand-thumbs-up" onClick={handleLike}></i>
-                )}
-                <span>{likesCount}</span>
-                {/* Dislike button */}
-                {disliked ? (
-                  <i
-                    className="bi bi-hand-thumbs-down-fill"
-                    onClick={handleDislike}
-                  ></i>
-                ) : (
-                  <i
-                    className="bi bi-hand-thumbs-down"
-                    onClick={handleDislike}
-                  ></i>
-                )}
-                <span>{dislikesCount}</span>
-                </Stack> 
-              </Stack>
-              <Form onSubmit={handleComment}>
-                <InputGroup className="mb-3 my-3">
-                  <Form.Control
-                    aria-label="user comment"
-                    type="text"
-                    placeholder="your comment"
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    autoFocus
-                  />
-                  <Button
-                    type="submit"
-                    variant="outline-secondary"
-                    id="button-addon2"
-                  >
-                    Comment
-                  </Button>
-                </InputGroup>
-              </Form>
-            </div>
-          ) : (
-            <div>
-              <p>Please login to like, comment and share.</p>
-            </div>
-          )}
-          <br />
-          <h2 className="text-center">Comments</h2>
-          {comments.map((comment, index) => (
+
+            {(data?.content?.length || 0) > 200 && (
+              <Button onClick={() => setExpanded(!expanded)} sx={{ mt: 1 }}>
+                {expanded ? "Show less" : "Read more"}
+              </Button>
+            )}
+
             <Stack
-              key={index}
-              direction="horizontal"
-              style={{
-                padding: "5px 12px 5px 5px",
-                backgroundColor: theme === "light" ? "white" : "black",
-                color: theme === "light" ? "black" : "white",
-              }}
+              direction="row"
+              spacing={2}
+              alignItems="center"
+              sx={{ mt: 2 }}
             >
-              <Image
-                src={authors[comment.authorId]?.photoURL}
-                style={{
-                  width: "6vh",
-                  height: "6vh",
-                  marginRight: "5px",
+              <IconButton
+                onClick={() => commentInputRef.current?.focus()}
+                sx={{ color: appTheme === "light" ? "#111111" : "white" }}
+              >
+                <CommentIcon />
+              </IconButton>
+              <Box sx={{ ml: "auto" }}>
+                <IconButton
+                  onClick={handleLike}
+                  disabled={!isLoggedIn || loading}
+                  sx={{ color: appTheme === "light" ? "#111111" : "white" }}
+                >
+                  {liked ? <ThumbUp /> : <ThumbUpOutlined />}
+                </IconButton>
+                <Typography
+                  component="span"
+                  sx={{ color: appTheme === "light" ? "#111111" : "white" }}
+                >
+                  {likesCount}
+                </Typography>
+                <IconButton
+                  onClick={handleDislike}
+                  disabled={!isLoggedIn || loading}
+                  sx={{ color: appTheme === "light" ? "#111111" : "white" }}
+                >
+                  {disliked ? <ThumbDown /> : <ThumbDownOutlined />}
+                </IconButton>
+                <Typography
+                  component="span"
+                  sx={{ color: appTheme === "light" ? "#111111" : "white" }}
+                >
+                  {dislikesCount}
+                </Typography>
+              </Box>
+            </Stack>
+
+            <Divider sx={{ my: 3 }} />
+
+            <Typography variant="h6" gutterBottom>
+              Comments
+            </Typography>
+
+            {comments.map((comment, index) => (
+              <Paper
+                key={index}
+                elevation={0}
+                sx={{
+                  p: 2,
+                  mb: 2,
+                  bgcolor: "action.hover",
                 }}
-                roundedCircle
-              />
-              <Stack
                 style={{
-                  padding: "6px",
-                  width: "80%",
                   backgroundColor:
-                    theme === "light"
-                      ? "rgba(150,200,200,0.3)"
-                      : "rgba(30,30,30,0.5)",
-                  borderRadius: "10px",
+                    appTheme === "light" ? "whitesmoke" : "#2C2C2C",
+                  color: appTheme === "light" ? "#111111" : "white",
                 }}
               >
-                <h5>{comment.author}</h5>
-                <p>{comment.content}</p>
-              </Stack>
-            </Stack>
-          ))}
-        </Stack>
-      </div>
-      <Modal show={showShare} onHide={handleShareClose}>
-        <Modal.Body
-          style={{
-            backgroundColor: theme === "light" ? "white" : "black",
-            color: theme === "light" ? "black" : "white",
-          }}
-        >
-          <h4 className="display-6 text-center">
-            Share this with your social Community!
-            <br />
-            <br />
-            <Row>
-              <Col>
-                <FacebookShareButton
-                  url={`https://zanis-pro.web.app/story/${data.id}`}
-                  quote="ZANIS.To Inform, Educate and Entertain the Nation!"
-                >
-                  <i className="bi bi-facebook"></i>
-                </FacebookShareButton>
-              </Col>
-              <Col>
-                <WhatsappShareButton
-                  url={`https://zanis-pro.web.app/story/${data.id}`}
-                  title="ZANIS "
-                  separator="To Inform, Educate and Entertain the Nation! "
-                >
-                  <i className="bi bi-whatsapp"></i>
-                </WhatsappShareButton>
-              </Col>
-              <Col>
-                <TwitterShareButton
-                  title="ZANIS"
-                  url={`https://zanis-pro.web.app/story/${data.id}`}
-                  via={"ZANIS. To Inform, Educate and Entertain the Nation"}
-                >
-                  <i className="bi bi-twitter"></i>
-                </TwitterShareButton>
-              </Col>
-              <Col>
-                <TelegramShareButton
-                  url={`https://zanis-pro.web.app/story/${data.id}`}
-                  title="ZANIS"
-                  description="ZANIS. To Inform, Educate and Entertain the Nation"
-                >
-                  <i className="bi bi-telegram"></i>
-                </TelegramShareButton>
-              </Col>
-            </Row>
-          </h4>
-          <br />
-          <br />
-          <p className="lead">or copy link</p>
-          <InputGroup className="mb-3">
-            <Form.Control
-              placeholder={`https://zanis-pro.web.app/story/${data.id}`}
-              aria-label="Recipient's username"
-              aria-describedby="basic-addon2"
-            />
-            <Button
-              variant="outline-success"
-              id="button-addon2"
-              onClick={() => {
-                navigator.clipboard
-                  .writeText(`https://zanis-pro.web.app/story/${data.id}`)
-                  .then(() => {
-                    console.log("Text copied to clipboard");
-                  })
-                  .catch((error) => {
-                    console.error("Error copying text to clipboard:", error);
-                  });
-              }}
-            >
-              Copy
-            </Button>
-          </InputGroup>
-        </Modal.Body>
-        <Modal.Footer
-          style={{
-            backgroundColor: theme === "light" ? "white" : "black",
-            color: theme === "light" ? "black" : "white",
-          }}
-        >
-          <Button variant="dark" onClick={handleShareClose}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </div>
+                <Stack direction="row" spacing={2}>
+                  <Avatar
+                    src={
+                      comment.authorPhoto || "/assets/profile.png"
+                    }
+                    sx={{ width: 40, height: 40 }}
+                  />
+                  <Box>
+                    <Typography variant="subtitle2">
+                      {comment.author || "Anonymous"}
+                    </Typography>
+                    <Typography variant="body2">{comment.content}</Typography>
+                  </Box>
+                </Stack>
+              </Paper>
+            ))}
+          </CardContent>
+        </Card>
+
+        {isLoggedIn && (
+          <Paper
+            elevation={3}
+            sx={{
+              position: "fixed",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              p: 2,
+              backgroundColor: appTheme === "light" ? "whitesmoke" : "#2C2C2C",
+              color: appTheme === "light" ? "#111111" : "white",
+            }}
+          >
+            <form onSubmit={handleComment}>
+              <TextField
+                fullWidth
+                placeholder="Add a comment..."
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                inputRef={commentInputRef}
+                InputProps={{
+                  sx: {
+                    color: appTheme === "light" ? "#111111" : "white", // Text color
+                  },
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton type="submit">
+                        <CommentIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </form>
+          </Paper>
+        )}
+
+        <Lightbox
+          open={lightboxOpen}
+          close={() => setLightboxOpen(false)}
+          slides={imageData}
+        />
+      </Container>
+    </Box>
   );
 }
 

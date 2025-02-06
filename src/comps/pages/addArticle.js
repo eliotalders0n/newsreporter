@@ -98,7 +98,7 @@ const AddArticle = () => {
                       setUploadProgress(0);
                       setShowModal(true);
                       // setUploading(true);
-                      navigate("/pending");
+                      navigate("/reels");
                     })
                     .catch((error) => {
                       console.error("Error adding article:", error);

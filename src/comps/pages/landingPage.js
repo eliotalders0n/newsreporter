@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Row,
@@ -8,299 +8,346 @@ import {
   Badge,
   Card,
   Container,
-  Button,
+  InputGroup,
   Modal,
+  Form,
+  Button,
 } from "react-bootstrap";
+import {
+  Avatar,
+  Skeleton,
+  Typography,
+  TextField,
+  Checkbox,
+  CardMedia,
+  CardContent,
+  FormControlLabel,
+  Button as MuiButton,
+} from "@mui/material";
+import { Clear } from "@mui/icons-material";
 import firebase from "./../../firebase";
 import AddArticle from "./addArticle";
-import { Skeleton } from "@mui/material";
-import DOMPurify from "dompurify";
-import { useTheme } from "../template/themeContext";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import { useTheme as useCustomTheme } from "../template/themeContext";
+import useGetMinistries from "../hooks/useGetMinistries";
+
+const VideoCard = ({ article, authors, ministries, theme }) => {
+  const videoRef = useRef(null);
+
+  const handleVideoClick = () => {
+    if (videoRef.current.requestFullscreen) {
+      videoRef.current.requestFullscreen();
+    } else if (videoRef.current.webkitRequestFullscreen) {
+      videoRef.current.webkitRequestFullscreen();
+    } else if (videoRef.current.mozRequestFullScreen) {
+      videoRef.current.mozRequestFullScreen();
+    } else if (videoRef.current.msRequestFullscreen) {
+      videoRef.current.msRequestFullscreen();
+    }
+  };
+
+  return (
+    <Col md={4} sm={6} xs={12} className="mb-4">
+      <Card
+        className="h-100 shadow-sm"
+        style={{
+          backgroundColor: theme === "light" ? "#fff" : "#1e1e1e",
+          color: theme === "light" ? "#111" : "#fff",
+          borderRadius: "10px",
+        }}
+      >
+        <CardMedia
+          component="video"
+          src={article.imagesUrls}
+          controls
+          sx={{
+            borderRadius: "8px 8px 0 0",
+            height: 200,
+          }}
+        />
+        <Card.Body>
+          <Card.Title className="text-truncate">{article.title}</Card.Title>
+          <Badge bg="danger">
+            {ministries.find((m) => m.id === article.ministry)?.name ||
+              article.ministry}
+          </Badge>
+        </Card.Body>
+        <Card.Footer className="d-flex align-items-center">
+          <Image
+            src={authors[article.author]?.photoURL || "assets/profile.png"}
+            alt="Author"
+            roundedCircle
+            style={{ width: "30px", height: "30px" }}
+          />
+          <small className="ms-2">
+            {authors[article.author]?.firstName || "Reporter"}{" "}
+            {authors[article.author]?.lastName || ""}
+          </small>
+          <small className="ms-auto">
+            {article.createdAt?.toDate().toLocaleDateString()}
+          </small>
+        </Card.Footer>
+      </Card>
+    </Col>
+  );
+};
+
+const ArticleCard = ({ article, authors, ministries, theme }) => (
+  <Col md={4} sm={6} xs={12} className="mb-4">
+    <Link
+      to={`/story/${article.id}`}
+      state={{ data: article }}
+      style={{ textDecoration: "none", color: "inherit" }}
+    >
+      <Card
+        className="h-100 shadow-sm"
+        style={{
+          backgroundColor: theme === "light" ? "#fff" : "#1e1e1e",
+          color: theme === "light" ? "#111" : "#fff",
+          borderRadius: "10px",
+        }}
+      >
+        <div
+          style={{
+            height: "200px",
+            background: `url(${article.imagesUrls[0]}) center/cover`,
+            borderRadius: "10px 10px 0 0",
+          }}
+        />
+        <Card.Body>
+          <Card.Title className="text-truncate">{article.title}</Card.Title>
+          <Badge bg="danger">
+            {ministries.find((m) => m.id === article.ministry)?.name ||
+              article.ministry}
+          </Badge>
+        </Card.Body>
+        <Card.Footer className="d-flex align-items-center">
+          <Image
+            src={authors[article.author]?.photoURL || "assets/profile.png"}
+            alt="Author"
+            roundedCircle
+            style={{ width: "30px", height: "30px" }}
+          />
+          <small className="ms-2">
+            {authors[article.author]?.firstName || "Reporter"}{" "}
+            {authors[article.author]?.lastName || ""}
+          </small>
+          <small className="ms-auto">
+            {article.createdAt?.toDate().toLocaleDateString()}
+          </small>
+        </Card.Footer>
+      </Card>
+    </Link>
+  </Col>
+);
 
 function Landing(props) {
   const navigate = useNavigate();
-  const { theme } = useTheme();
   const [loading, setLoading] = useState(true);
   const [articles, setArticles] = useState([]);
+  const [filteredArticles, setFilteredArticles] = useState([]);
   const [authors, setAuthors] = useState({});
-  const [ministries, setMinistries] = useState({}); // To store ministries data
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterVideo, setFilterVideo] = useState(false);
+  const { theme: appTheme } = useCustomTheme();
+  const { docs: ministries } = useGetMinistries();
+  const [visibleItems, setVisibleItems] = useState(8);
 
-  // Fetch articles and authors with useCallback to avoid re-fetching on re-renders
-  const fetchData = useCallback(async () => {
-    try {
-      const articlesSnapshot = await firebase
-        .firestore()
-        .collection("Articles")
-        .where("status", "==", "approved")
-        .where("video", "==", false)
-        .orderBy("createdAt", "desc")
-        .get();
+  const muiTheme = createTheme({
+    palette: {
+      mode: appTheme === "light" ? "light" : "dark",
+    },
+  });
 
-      const articlesData = articlesSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const articlesSnapshot = await firebase
+          .firestore()
+          .collection("Articles")
+          .where("status", "==", "approved")
+          .orderBy("createdAt", "desc")
+          .get();
 
-      const authorsSnapshot = await firebase
-        .firestore()
-        .collection("Users")
-        .get();
+        const articlesData = articlesSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setArticles(articlesData);
+        setFilteredArticles(articlesData);
 
-      const authorsData = authorsSnapshot.docs.reduce((acc, doc) => {
-        acc[doc.id] = doc.data();
-        return acc;
-      }, {});
+        const authorsSnapshot = await firebase
+          .firestore()
+          .collection("Users")
+          .get();
+        const authorsData = {};
+        authorsSnapshot.docs.forEach((doc) => {
+          authorsData[doc.id] = doc.data();
+        });
+        setAuthors(authorsData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      setArticles(articlesData);
-      setAuthors(authorsData);
-
-      // Fetch ministries data
-      const ministriesIds = [
-        ...new Set(
-          articlesData.map((article) => authorsData[article.author]?.ministry)
-        ),
-      ];
-      const ministriesPromises = ministriesIds.map((id) =>
-        firebase.firestore().collection("Ministries").doc(id).get()
-      );
-      const ministriesSnapshot = await Promise.all(ministriesPromises);
-      const ministriesData = ministriesSnapshot.reduce((acc, doc) => {
-        if (doc.exists) {
-          acc[doc.id] = doc.data();
-        }
-        return acc;
-      }, {});
-
-      setMinistries(ministriesData);
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      setLoading(false);
-    }
+    fetchData();
   }, []);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    const filtered = articles.filter((article) => {
+      const matchesSearch =
+        article.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        article.ministry?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        article.description?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesVideo = filterVideo ? article.video === true : true;
+
+      return matchesSearch && matchesVideo;
+    });
+
+    setFilteredArticles(filtered);
+    setVisibleItems(8); // Reset visible items when filters change
+  }, [articles, searchTerm, filterVideo]);
+
+  const resetFilters = () => {
+    setSearchTerm("");
+    setFilterVideo(false);
+  };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + document.documentElement.scrollTop ===
+        document.documentElement.offsetHeight
+      ) {
+        setVisibleItems((prevVisibleItems) => prevVisibleItems + 8);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const [showShare, setShowShare] = useState(false);
   const handleShareClose = () => setShowShare(false);
   const handleShareShow = () => setShowShare(true);
 
-  const sanitizeHTML = (html) => {
-    return {
-      __html: DOMPurify.sanitize(html),
-    };
-  };
-
   return (
-    <Container
-      fluid
-      style={{
-        backgroundColor: theme === "light" ? "white" : "black",
-        color: theme === "light" ? "black" : "white",
-        minHeight: "100vh",
-        padding: "12vh 3vh 12vh 3vh",
-      }}
-    >
-      <Stack className="d-flex justify-content-center" gap={3}>
-        <Button variant="secondary" onClick={handleShareShow}>
-          Report News
-        </Button>
-      </Stack>
-      <br />
-      <Stack direction="horizontal" gap={3}>
-        <h2>Your News</h2>
-        <p className="p-2 ms-auto"></p>
-      </Stack>
-      <Row>
-        {loading ? (
-          <Stack spacing={1}>
-            <Skeleton
-              variant="rounded"
-              sx={{ fontSize: "3rem", bgcolor: "grey" }}
-            />
-            <br />
-            <Skeleton
-              variant="circular"
-              sx={{ bgcolor: "grey" }}
-              width={40}
-              height={40}
-            />
-            <br />
-            <Skeleton
-              variant="rectangular"
-              sx={{ bgcolor: "grey" }}
-              width={320}
-              height={118}
-            />
-            <br />
-            <Skeleton
-              variant="rounded"
-              sx={{ bgcolor: "grey" }}
-              width={320}
-              height={60}
-            />
-            <br />
-            <Skeleton
-              variant="rounded"
-              sx={{ fontSize: "3rem", bgcolor: "grey" }}
-            />
-            <br />
-            <Skeleton
-              variant="circular"
-              sx={{ bgcolor: "grey" }}
-              width={40}
-              height={40}
-            />
-            <br />
-            <Skeleton
-              variant="rectangular"
-              sx={{ bgcolor: "grey" }}
-              width={320}
-              height={118}
-            />
-            <br />
-            <Skeleton
-              variant="rounded"
-              sx={{ bgcolor: "grey" }}
-              width={320}
-              height={60}
-            />
-          </Stack>
-        ) : (
-          articles.map((article) => (
-            <Col
-              style={{ height: " 45vh", marginBottom: "10%", padding: "0 0" }}
-            >
-              <Link
-                to={"/story/" + article.id}
-                state={{ data: article }}
-                style={{
-                  backgroundColor: theme === "light" ? "white" : "black",
-                  color: theme === "light" ? "black" : "white",
-                  textDecoration: "none",
-                }}
-              >
-                <Card
-                  flex={{ base: "auto", md: 1 }}
-                  style={{
-                    height: "100%",
-                    minWidth: "38vh",
-                    border: "none",
-                    backgroundColor: theme === "light" ? "white" : "black",
-                    color: theme === "light" ? "black" : "white",
-                  }}
-                  onClick={() => navigate("/story")}
-                >
-                  <Card.Body
-                    style={{
-                      backgroundImage: `url("${article.imagesUrls[0]}")`,
-                      backgroundColor: theme === "light" ? "white" : "black",
-                      color: theme === "light" ? "black" : "white",
-                      backgroundSize: "cover",
-                      borderRadius: "18px",
-                    }}
-                  >
-                    {console.log(article.imagesUrls[0])}
-                    <Card.Title
-                      style={{
-                        backgroundColor:
-                          theme === "light"
-                            ? "rgba(250,250,250,0.8)"
-                            : "rgba(50,50,50,0.5)",
-                        color: theme === "light" ? "black" : "white",
-                        borderRadius: "10px",
-                        padding: "1px",
-                      }}
-                    >
-                      <b>{article.title}</b>
-                    </Card.Title>
-                    <Card.Subtitle className="mb-2 text-muted">
-                      <Badge bg="danger">
-                        {/* {authors[article.author]?.ministry} */}
-                        {ministries[authors[article.author]?.ministry]?.name ||
-                          "Unknown Ministry"}
-                      </Badge>
-                    </Card.Subtitle>
-                  </Card.Body>
-                  <Card.Text
-                    style={{
-                      backgroundColor: theme === "light" ? "white" : "black",
-                      color: theme === "light" ? "black" : "white",
-                      fontSize: "14px",
-                      margin: "5px 5px",
-                    }}
-                  >
-                    {article.content.length > 100 ? (
-                      <div
-                        dangerouslySetInnerHTML={sanitizeHTML(
-                          `${article.content.substring(0, 100)}...`
-                        )}
-                      />
-                    ) : (
-                      <div
-                        dangerouslySetInnerHTML={sanitizeHTML(article.content)}
-                      />
-                    )}
-                  </Card.Text>
-                  <Stack
-                    direction="horizontal"
-                    gap={2}
-                    style={{
-                      backgroundColor: theme === "light" ? "white" : "black",
-                      color: theme === "light" ? "black" : "white",
-                    }}
-                  >
-                    <Image
-                      src="assets/ministries/labour.png"
-                      alt=""
-                      style={{ width: "3vh" }}
-                      roundedCircle
-                    />
-                    {authors[article.author]?.firstName}{" "}
-                    {authors[article.author]?.lastName}
-                  </Stack>
-                  <Card.Text
-                    style={{
-                      backgroundColor: theme === "light" ? "white" : "black",
-                      color: theme === "light" ? "black" : "white",
-                      fontSize: "10px",
-                      margin: "2px 5px",
-                    }}
-                  >
-                    {article.createdAt &&
-                      article.createdAt.toDate().toLocaleString()}
-                  </Card.Text>
-                </Card>
-              </Link>
-            </Col>
-          ))
-        )}
-      </Row>
-      <Modal show={showShare} onHide={handleShareClose}>
-        <Modal.Body
-          style={{
-            backgroundColor: theme === "light" ? "white" : "black",
-            color: theme === "light" ? "black" : "white",
-          }}
-        >
-          <h2 className="text-center display-3">Submit Report</h2>
-          <br />
-          <AddArticle />
-        </Modal.Body>
-        <Modal.Footer
-          style={{
-            backgroundColor: theme === "light" ? "white" : "black",
-            color: theme === "light" ? "black" : "white",
-          }}
-        >
-          <Button variant="dark" onClick={handleShareClose}>
-            X
+    <ThemeProvider theme={muiTheme}>
+      <Container
+        fluid
+        className="py-5"
+        style={{
+          backgroundColor: appTheme === "light" ? "#f9fafc" : "#121212",
+          color: appTheme === "light" ? "#111" : "#fff",
+          minHeight: "100vh",
+          margin: "70px 0",
+        }}
+      >
+        <Stack className="d-flex justify-content-center" gap={3} style={{marginBottom: "20px"}}>
+          <Button variant="secondary" onClick={handleShareShow}>
+            Report News
           </Button>
-        </Modal.Footer>
-      </Modal>
-    </Container>
+        </Stack>
+        <div className="d-flex flex-column flex-md-row gap-3 mb-4">
+          <TextField
+            fullWidth
+            label="Search Articles"
+            variant="outlined"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            sx={{
+              backgroundColor: appTheme === "light" ? "#fff" : "#333",
+              borderRadius: "4px",
+            }}
+            InputProps={{
+              endAdornment: (
+                <Clear
+                  onClick={resetFilters}
+                  sx={{
+                    color: appTheme === "light" ? "text.primary" : "#fff",
+                  }}
+                />
+              ),
+            }}
+          />
+
+          <div className="d-flex gap-2 align-items-center">
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={filterVideo}
+                  onChange={(e) => setFilterVideo(e.target.checked)}
+                  sx={{
+                    color: appTheme === "light" ? "#000" : "#fff",
+                    "&.Mui-checked": {
+                      color: appTheme === "light" ? "#000" : "#fff",
+                    },
+                  }}
+                />
+              }
+              label="Show Videos Only"
+              sx={{ color: appTheme === "light" ? "#000" : "#fff" }}
+            />
+          </div>
+        </div>
+
+        <Row>
+          {loading ? (
+            <Skeleton variant="rectangular" width="100%" height={200} />
+          ) : filteredArticles.length === 0 ? (
+            <p>No articles found.</p>
+          ) : (
+            filteredArticles
+              .slice(0, visibleItems)
+              .map((article) =>
+                article.video ? (
+                  <VideoCard
+                    key={article.id}
+                    article={article}
+                    authors={authors}
+                    ministries={ministries}
+                    theme={appTheme}
+                  />
+                ) : (
+                  <ArticleCard
+                    key={article.id}
+                    article={article}
+                    authors={authors}
+                    ministries={ministries}
+                    theme={appTheme}
+                  />
+                )
+              )
+          )}
+        </Row>
+
+        <Modal show={showShare} onHide={handleShareClose}>
+          <Modal.Body
+            style={{
+              backgroundColor: appTheme === "light" ? "white" : "black",
+              color: appTheme === "light" ? "black" : "white",
+            }}
+          >
+            <h2 className="text-center display-3">Submit Report</h2>
+            <br />
+            <AddArticle />
+          </Modal.Body>
+          <Modal.Footer
+            style={{
+              backgroundColor: appTheme === "light" ? "white" : "black",
+              color: appTheme === "light" ? "black" : "white",
+            }}
+          >
+            <Button variant="dark" onClick={handleShareClose}>
+              X
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      </Container>
+    </ThemeProvider>
   );
 }
 

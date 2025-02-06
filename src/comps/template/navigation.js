@@ -1,57 +1,76 @@
-// Your Navigation Component
 
-import React from 'react';
-import { Nav } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { BottomNavigation, BottomNavigationAction } from '@mui/material';
+import { useTheme } from './themeContext';
+import HomeIcon from '@mui/icons-material/Home';
+import ArchiveIcon from '@mui/icons-material/Archive';
+import PersonIcon from '@mui/icons-material/Person';
+
 
 const Navigation = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { theme } = useTheme();
+  const [value, setValue] = useState(location.pathname);
+
+  const handleNavigation = (path) => {
+    setValue(path);
+    navigate(path);
+  };
 
   return (
-    <Nav
-      variant="tabs"
-      justify
-      defaultActiveKey="/home"
-      className="fixed-bottom"
-      style={{ backgroundColor: "black" }}
+    <BottomNavigation
+      value={value}
+      onChange={(event, newValue) => handleNavigation(newValue)}
+      style={{
+        position: "fixed",
+        bottom: 0,
+        width: "100%",
+        backgroundColor: theme === "light" ? "whitesmoke" : "#2C2C2C",
+        color: theme === "light" ? "#2C2C2C" : "white",
+      }}
     >
-      <Nav.Item>
-        <Nav.Link
-          as={Link}
-          to="/home"
-          style={{ color: "grey" }}
-          onClick={() => navigate('/home')}
-        >
-          <i className="bi bi-house"></i>
-          <br />
-          Home
-        </Nav.Link>
-      </Nav.Item>
-      <Nav.Item>
-        <Nav.Link
-          as={Link}
-          to="/reels"
-          style={{ color: "grey" }}
-          onClick={() => navigate('/reels')}
-        >
-          <i className="bi bi-tv"></i>
-          <br />
-          Reports
-        </Nav.Link>
-      </Nav.Item>
-      <Nav.Item>
-        <Nav.Link
-          as={Link}
-          to="/profile"
-          style={{ color: "grey" }}
-          onClick={() => navigate('/profile')}
-        >
-          <i className="bi bi-person"></i>
-          <br />
-          Profile
-        </Nav.Link>
-      </Nav.Item>
-    </Nav>
+      <BottomNavigationAction
+        label="Home"
+        value="/home"
+        icon={<HomeIcon />}
+        sx={{
+          color:
+            value === "/home"
+              ? "green"
+              : theme === "light"
+              ? "#2C2C2C"
+              : "white",
+        }}
+      />
+       <BottomNavigationAction
+        label="Reports"
+        value="/reels"
+        icon={<ArchiveIcon />}
+        sx={{
+          color:
+            value === "/home"
+              ? "green"
+              : theme === "light"
+              ? "#2C2C2C"
+              : "white",
+        }}
+      />
+       <BottomNavigationAction
+        label="Profile"
+        value="/profile"
+        icon={<PersonIcon />}
+        sx={{
+          color:
+            value === "/home"
+              ? "green"
+              : theme === "light"
+              ? "#2C2C2C"
+              : "white",
+        }}
+      />
+    </BottomNavigation>
   );
 };
 

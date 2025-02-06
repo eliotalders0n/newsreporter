@@ -8,30 +8,69 @@ import { Skeleton, Stack } from "@mui/material";
 import { useTheme } from "../template/themeContext";
 import { ToastContainer, toast } from "react-toastify";
 
-const Pending = () => {
+const ReportsTabs = () => {
+  const [activeTab, setActiveTab] = useState("pending");
   const [articles, setArticles] = useState([]);
-  const [authors, setAuthors] = useState({});
   const { theme } = useTheme();
-  const [loading, setLoading] = useState(true); // State to track loading status
+  const [loading, setLoading] = useState(true);
+  const currentUser = firebase.auth().currentUser;
+  const uid = currentUser?.uid;
+
+  const TABS = [
+    { id: "pending", label: "Pending" },
+    { id: "approved", label: "Approved" },
+    { id: "dismissed", label: "Dismissed" },
+    { id: "all", label: "All" },
+  ];
 
   useEffect(() => {
-    // Load articles from Firestore on component mount
-    const unsubscribeArticles = firebase
+    if (!uid) return;
+
+    setLoading(true);
+    setArticles([]);
+
+    let query = firebase
       .firestore()
       .collection("Articles")
-      .where("author","==", firebase.auth().currentUser.uid)
-      .where("status", "==", "pending")
-      .orderBy("createdAt", "desc")
-      .onSnapshot((snapshot) => {
-        const articles = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setArticles(articles);
-        setLoading(false);
-      });
+      .where("author", "==", uid);
 
-  }, []);
+    if (activeTab !== "all") {
+      query = query.where("status", "==", activeTab);
+    }
+
+    const unsubscribe = query
+      .orderBy("createdAt", "desc")
+      .onSnapshot(
+        (snapshot) => {
+          const articles = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          setArticles(articles);
+          setLoading(false);
+        },
+        (error) => {
+          console.error("Error fetching articles:", error);
+          toast.error("Error fetching articles");
+          setLoading(false);
+        }
+      );
+
+    return () => unsubscribe();
+  }, [activeTab, uid]);
+
+  const getBadgeVariant = (status) => {
+    switch (status) {
+      case "approved":
+        return "success";
+      case "dismissed":
+        return "danger";
+      case "pending":
+        return "warning";
+      default:
+        return "primary";
+    }
+  };
 
   return (
     <div
@@ -53,35 +92,33 @@ const Pending = () => {
         theme="colored"
         transition="bounce"
       />
-      <ReportsHeader />
-      <h6 className="display-6 text-center">Pending</h6>
+      <Nav variant="tabs" defaultActiveKey="pending" className="mb-4">
+        {TABS.map((tab) => (
+          <Nav.Item key={tab.id}>
+            <Nav.Link
+              eventKey={tab.id}
+              active={activeTab === tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              style={{
+                color: activeTab === tab.id ? "white" : theme === "light" ? "black" : "white",
+                backgroundColor: activeTab === tab.id ? "#007bff" : "transparent",
+              }}
+            >
+              {tab.label}
+            </Nav.Link>
+          </Nav.Item>
+        ))}
+      </Nav>
+
+      <h6 className="display-6 text-center">{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h6>
       <br />
-      {loading ? ( // Render Skeleton while loading is true
+
+      {loading ? (
         <Stack spacing={1}>
-          {/* For variant="text", adjust the height via font-size */}
-          <Skeleton
-            variant="rounded"
-            sx={{ fontSize: "3rem", bgcolor: "grey" }}
-          />
-          {/* For other variants, adjust the size with `width` and `height` */}
-          <Skeleton
-            variant="circular"
-            sx={{ bgcolor: "grey" }}
-            width={40}
-            height={40}
-          />
-          <Skeleton
-            variant="rectangular"
-            sx={{ bgcolor: "grey" }}
-            width={210}
-            height={60}
-          />
-          <Skeleton
-            variant="rounded"
-            sx={{ bgcolor: "grey" }}
-            width={210}
-            height={60}
-          />
+          <Skeleton variant="rounded" sx={{ fontSize: "3rem", bgcolor: "grey" }} />
+          <Skeleton variant="circular" sx={{ bgcolor: "grey" }} width={40} height={40} />
+          <Skeleton variant="rectangular" sx={{ bgcolor: "grey" }} width={210} height={60} />
+          <Skeleton variant="rounded" sx={{ bgcolor: "grey" }} width={210} height={60} />
         </Stack>
       ) : (
         articles.map((article) => (
@@ -89,15 +126,21 @@ const Pending = () => {
             <h4>{article.title}</h4>
             <p className="lead" style={{ fontSize: "14px" }}>
               Submitted on{" "}
-              {article.createdAt && article.createdAt.toDate().toLocaleString()}
+              {article.createdAt?.toDate().toLocaleString()}
             </p>
-            <Badge>Pending Approval</Badge>
-            <hr style={{ color: "white" }} />
+            <Badge bg={getBadgeVariant(activeTab === "all" ? article.status : activeTab)}>
+              {activeTab === "all" ? article.status : activeTab}
+            </Badge>
+            <hr style={{ color: theme === "light" ? "black" : "white" }} />
           </div>
         ))
+      )}
+
+      {!loading && articles.length === 0 && (
+        <p className="text-center">No articles found in this category</p>
       )}
     </div>
   );
 };
 
-export default Pending;
+export default ReportsTabs;

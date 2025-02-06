@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Stack,
-  Image,
-  Container,
-  Form,
-  Col,
-  Row,
-} from "react-bootstrap";
+import { Stack, Image, Container, Form, Col, Row } from "react-bootstrap";
 import firebase from "./../../firebase";
 import { useNavigate } from "react-router-dom";
 import EmailButton from "./sendHelpEmail";
@@ -45,14 +38,39 @@ const Profile = () => {
   });
 
   useEffect(() => {
-    firebase
-      .firestore()
-      .collection("Users")
-      .doc(firebase.auth().currentUser.uid)
-      .onSnapshot((doc) => {
-        setUser(doc.data());
+    const unsubscribeAuth = firebase
+      .auth()
+      .onAuthStateChanged((currentUser) => {
+        if (currentUser) {
+          const userDocRef = firebase
+            .firestore()
+            .collection("Users")
+            .doc(currentUser.uid);
+          const unsubscribeSnapshot = userDocRef.onSnapshot((doc) => {
+            if (doc.exists) {
+              const userData = doc.data();
+              setUser(userData);
+              // setUserPic(userData?.photoURL);
+              // setFormData({
+              //   name: userData.name || "",
+              //   email: userData.email || "",
+              //   age: userData.age || "",
+              //   nrc: userData.nrc || "",
+              // });
+            } else {
+              console.error("User document does not exist");
+            }
+          });
+          return () => unsubscribeSnapshot();
+        } else {
+          console.log("No authenticated user found");
+          setUser(null);
+        }
       });
+    return () => unsubscribeAuth();
   }, []);
+
+  console.log("User is : ", user_);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -66,24 +84,35 @@ const Profile = () => {
     e.preventDefault();
     try {
       setSubmitting(true);
-      // Update user data in Firestore
+
+      // Remove empty fields from the user object
+      const filteredUserData = Object.fromEntries(
+        Object.entries(user_).filter(
+          ([_, value]) => value !== "" && value !== undefined
+        )
+      );
+
+      if (Object.keys(filteredUserData).length === 0) {
+        alert("No valid data to update.");
+        setSubmitting(false);
+        return;
+      }
+
       await firebase
         .firestore()
         .collection("Users")
         .doc(firebase.auth().currentUser.uid)
-        .update(user_)
-        .then(() => {
-          setSubmitting(false);
-          console.log("User data updated successfully!");
-          alert("Profile updated successfully!")
-        })
+        .update(filteredUserData);
+
+      console.log("User data updated successfully!");
+      alert("Profile updated successfully!");
     } catch (error) {
       console.error("Error updating user data:", error);
-      alert("Error updating profile data")
-      // Handle error gracefully, show an error message to the user, etc.
+      alert("Error updating profile data");
+    } finally {
+      setSubmitting(false);
     }
   };
-
   const handleProfilePictureChange = (event) => {
     const file = event.target.files[0];
     const storageRef = firebase.storage().ref();
@@ -95,7 +124,8 @@ const Profile = () => {
       "state_changed",
       (snapshot) => {
         // Calculate upload progress
-        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        const progress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
         setUploadProgress(progress);
       },
       (error) => {
@@ -112,7 +142,6 @@ const Profile = () => {
     );
     setUploading(true);
   };
-
 
   const updateProfilePicture = () => {
     const currentUser = firebase.auth().currentUser;
@@ -257,7 +286,9 @@ const Profile = () => {
         </Button>
         <br />
       </Stack>
-      {uploading && <LinearProgress variant="determinate" value={uploadProgress} />}
+      {uploading && (
+        <LinearProgress variant="determinate" value={uploadProgress} />
+      )}
       <p className="text-center">
         {user_ && user_.firstName} {user_ && user_.lastName} <br />{" "}
         {user_ && user_.email}
@@ -322,21 +353,24 @@ const Profile = () => {
         </Row>
 
         <Row className="mb-3">
-        <Form.Group as={Col} controlId="formGridMinistry">
-        <Form.Label>Ministry</Form.Label>
-          <Form.Select
-            required
-            label="Select Ministry"
-            onChange={handleInputChange}
-          >
-            <option value="">
-              <em>None</em>
-            </option>
-            {Ministries.map((ministry) => (
-              <option value={ministry.name}>{ministry.description}</option>
-            ))}
-          </Form.Select>
-        </Form.Group>
+          <Form.Group as={Col} controlId="formGridMinistry">
+            <Form.Label>Ministry</Form.Label>
+            <Form.Select
+              required
+              name="ministry"
+              value={user_.ministry} // Ensure it's controlled
+              onChange={handleInputChange}
+            >
+              <option value="">
+                <em>None</em>
+              </option>
+              {Ministries.map((ministry) => (
+                <option key={ministry.name} value={ministry.name}>
+                  {ministry.name}
+                </option>
+              ))}
+            </Form.Select>
+          </Form.Group>
         </Row>
 
         <Form.Group className="mb-3" controlId="formGridAddress1">
@@ -370,7 +404,14 @@ const Profile = () => {
             value={user_.password}
           />
         </Form.Group> */}
-        <Button variant="contained" disabled={submitting} fullWidth type="submit">{submitting ? "Submitting..." : "Submit"}</Button>
+        <Button
+          variant="contained"
+          disabled={submitting}
+          fullWidth
+          type="submit"
+        >
+          {submitting ? "Submitting..." : "Submit"}
+        </Button>
       </Form>
 
       <EmailButton />

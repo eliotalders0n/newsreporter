@@ -5,79 +5,39 @@ import firebase from "./firebase";
 import { Container, Row, Spinner, Col } from "react-bootstrap";
 import Typography from "@mui/material/Typography";
 import LoginRoutes from "./loginRoutes";
+import { BrowserRouter as Router } from "react-router-dom";
 import Routers from "./routes";
 import { ThemeProvider } from "./comps/template/themeContext";
-import { ToastContainer, toast } from "react-toastify"; // Import toast function from react-toastify
-import "react-toastify/dist/ReactToastify.css";
-import NotificationSystem from "./comps/template/notificationSystem";
+import Loading from "./comps/assets/Loading2.gif";
 
 const App = () => {
-  const [state, setstate] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    setIsLoading(true); // Set isLoading to true when the component mounts
+    // Listen for authentication state changes
+    const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
+      setIsLoggedIn(!!user);
+      setIsLoading(false);
+    });
 
-    const authStateChanged = (user) => {
-      if (user) {
-        setstate(true);
-        setIsLoading(false); // Set isLoading to false when the user state changes
-      } else {
-        setError("Only reporters are allowed to log in.");
-        setstate(false);
-        setIsLoading(false); // Set isLoading to false when the user state changes
-      }
-    };
-
-    const unsubscribe = firebase.auth().onAuthStateChanged(authStateChanged);
-
-    // Clean up the subscription when the component unmounts
-    return () => {
-      unsubscribe();
-    };
+    return () => unsubscribe();
   }, []);
 
-  useEffect(() => {
-    console.log("useEffect executed");
-    // Check if notification permission is granted
-    if (Notification.permission === 'granted') {
-      // Permission already granted, no need to request
-      toast.success("Notification permission granted!");
-    } else if (Notification.permission !== 'denied') {
-      // Request notification permission
-      Notification.requestPermission().then((permission) => {
-        if (permission === 'granted') {
-          toast.success("Notification permission granted!");
-        }
-      });
-    }
-  }, []);
+  if (isLoading) {
+    return (
+      <ThemeProvider>
+        <Container style={{ backgroundColor: "#f5f5f5", minHeight: "100vh" }}>
+          <img src={Loading} width={"100%"} />
+        </Container>
+      </ThemeProvider>
+    );
+  }
 
   return (
     <ThemeProvider>
-      <div>
-        {/* Notification System */}
-        <NotificationSystem />
-        <ToastContainer position="top-right" autoClose={false} />
-      </div>
-      {error && (
-        <Typography
-          variant="body2"
-          color="error"
-          style={{
-            backgroundColor: "rgb(0,70,0)",
-            fontSize: "14px",
-            color: "lightgrey",
-            padding: "6px",
-          }}
-          align="center"
-        >
-          {error}
-        </Typography>
-      )}
-      {!state && <LoginRoutes />}
-      {state && <Routers />}
+      <Router>{isLoggedIn ? <LoginRoutes /> : <Routers />}</Router>
       {isLoading && (
         <Container>
           <Row className="justify-content-center align-items-center ">

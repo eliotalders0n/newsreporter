@@ -95,7 +95,7 @@ const AddArticle = () => {
                       setShowModal(true);
 
                       // Redirect to another page or perform any other action
-                      navigate("/pending");
+                      navigate("/reels");
                     })
                     .catch((error) => {
                       console.error("Error adding article:", error);

@@ -9,10 +9,8 @@ const ReelCard = () => {
       style={{
         backgroundColor: "black",
         height: "auto",
-        // padding: "12vh 1vh 12vh 1vh",
       }}
     >
-      {/* <ReportsHeader /> */}
       <Pending/>
     </div>
   );
