@@ -411,8 +411,8 @@ export default function RegisterForm() {
                         <em>None</em>
                       </MenuItem>
                       {Ministries.map((ministry) => (
-                        <MenuItem value={ministry.id}>
-                          {ministry.description}
+                        <MenuItem value={ministry.name}>
+                          {ministry.name}
                         </MenuItem>
                       ))}
                     </TextField>

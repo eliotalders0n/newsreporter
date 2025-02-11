@@ -42,7 +42,7 @@ const defaultTheme = createTheme({
 
 export default function LoginForm() {
   const [loggedin, setLoggedin] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState("Only reporters are allowed to log in.");
 
   const handleSubmit = async (event) => {
     event.preventDefault();
